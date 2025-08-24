@@ -15,8 +15,9 @@ export default function Forgot() {
     setLoading(true);
 
     try {
-      const response = await api.post("/forgot", { email });
-
+      console.log("Submitting forgot password for:", email);
+      const response = await api.post("/api/auth/forgot", { email });
+      console.log("Forgot password response:", response.data);
       if (response.data.status === "otpsent") {
         toast.success("OTP sent successfully!");
         navigate("/verify", { state: { email } });

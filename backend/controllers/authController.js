@@ -1,7 +1,10 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sendEmail } = require("../utils/sendEmail");
+// const { sendEmail } = require("../utils/sendEmail");
+const SenderEmail = process.env.SenderEmail; // set in .env
+const passkey = process.env.adminPass; // set in .env
+const nodemailer = require("nodemailer");
 
 const otpStore = {};
 
@@ -52,39 +55,64 @@ exports.login = async (req, res) => {
     res.status(500).json({ status: "fail" });
   }
 };
-
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
+
   try {
     const user = await User.findOne({ email });
     if (!user) return res.json({ status: "Doesnotexist" });
 
+    // Generate OTP
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+    // Store OTP before sending email
     otpStore[email] = otp;
 
-    await sendEmail(
-      email,
-      "Forgot Password - OTP Verification",
-      `Hi, your OTP is ${otp}. Please do not share it.`
-    );
+    // --- Send Email ---
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: String(SenderEmail),
+        pass: String(passkey),
+      },
+    });
 
+    const mailOptions = {
+      from: String(SenderEmail),
+      to: email,
+      subject: "Forgot Password - OTP Verification",
+      text: `Hi, your OTP is ${otp}. Please do not share it.`,
+    };
+
+    // Use await to ensure OTP is stored before proceeding
+    await transporter.sendMail(mailOptions);
+
+    // console.log("OTP stored for:", email, otp);
     res.json({ status: "otpsent", email });
   } catch (error) {
+    // console.error("Error in forgotPassword:", error);
     res.json({ status: "fail" });
   }
 };
 
 exports.verifyOtp = async (req, res) => {
   const { email, number } = req.body;
+  // console.log("Verifying OTP for:", email, number);
+
   try {
-    if (otpStore[email] && otpStore[email] === number.trim()) {
-      delete otpStore[email];
+    const storedOtp = otpStore[email];
+    // console.log("Stored OTP:", storedOtp);
+
+    if (storedOtp && storedOtp === number.trim()) {
+      delete otpStore[email]; // remove OTP after successful verification
       const user = await User.findOne({ email });
       return res.json({ status: "success", email: user.email, name: user.name });
     } else {
       return res.json({ status: "otpincorrect" });
     }
   } catch (error) {
+    // console.error("Error in verifyOtp:", error);
     res.status(500).json({ status: "error" });
   }
 };
+

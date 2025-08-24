@@ -24,7 +24,7 @@ export default function Verify() {
 
     setIsLoading(true);
     try {
-      const response = await axiosHelper.post("/api/verify", {
+      const response = await axiosHelper.post("/api/auth/verify", {
         email,
         number,
       });
