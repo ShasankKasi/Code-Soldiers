@@ -1,8 +1,7 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "../components/Home";
 import Admin from "../components/Admin";
-import Signup from "../components/Signup";
 import Forgot from "../components/Forgot";
 import Verify from "../components/Verify";
 import Question from "../components/Question";
@@ -14,6 +13,7 @@ import Contact from "../components/Contact";
 import PageNotFound from "../components/PageNotFound";
 import Login from "../components/Login";
 import PrivateRoute from "../src/utils/PrivateRoute";
+import Signup from "../components/signup";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,14 +23,30 @@ const queryClient = new QueryClient({
   },
 });
 
+// Utility to check if user is logged in
+const isAuthenticated = () => {
+  return !!localStorage.getItem("token"); // or however you store the token
+};
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <Router>
         <Routes>
+          {/* Dynamic root route */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated() ? (
+                <Navigate to="/home" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
           {/* Public routes */}
-          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
