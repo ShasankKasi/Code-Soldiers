@@ -28,12 +28,10 @@ exports.signup = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  console.log("Login request received:", req.body);
   const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ email });
-    console.log("User found:", user);
     if (!user) return res.json({ status: "doesnotexist" });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -42,7 +40,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     if (email === process.env.adminEmail) {

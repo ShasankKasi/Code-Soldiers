@@ -5,6 +5,7 @@ const { execute } = require("../utils/execute");
 // ✅ Get all questions
 exports.getQuestions = async (req, res) => {
   try {
+    // console.log("Query Params:", req.query);
     const { difficulty } = req.query;
     let filter = {};
 
@@ -13,6 +14,7 @@ exports.getQuestions = async (req, res) => {
     }
 
     const questions = await Question.find(filter);
+    // console.log("Fetched Questions:", questions.length);
     res.json(questions);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch questions" });
@@ -34,7 +36,7 @@ exports.getQuestionById = async (req, res) => {
 // ✅ Run testcases for a question
 exports.runTestcases = async (req, res) => {
   const { testcases, language, code, limit } = req.body;
-
+  console.log("Run Testcases Request:", { language, limit, codeLength: code.length });
   if (!code) {
     return res.status(400).json({ success: false, error: "Code is empty" });
   }

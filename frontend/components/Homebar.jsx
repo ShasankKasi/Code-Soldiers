@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 import styled from "styled-components";
-import { FiLogOut } from "react-icons/fi";
+import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import { jwtDecode } from "jwt-decode";
 
 const Navbar = styled.nav`
   background-color: #008bff;
@@ -35,38 +35,105 @@ const NavLinks = styled.ul`
   list-style: none;
   margin: 0;
   padding: 0;
+
+  @media (max-width: 768px) {
+    display: ${({ $open }) => ($open ? "flex" : "none")};
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    background: #0077e6;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+  }
+`;
+const RightSection = styled.div`
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* pushes to rightmost */
 `;
 
 const NavLink = styled.li`
   margin-left: 3rem;
-`;
 
+  @media (max-width: 768px) {
+    margin: 0.8rem 0;
+  }
+`;
 const StyledLink = styled(Link)`
   display: flex;
   align-items: center;
+  justify-content: center;
   text-decoration: none;
   color: white;
   font-size: 1rem;
   font-weight: bold;
   transition: opacity 0.3s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  height: 100%;
 
   &:hover {
     opacity: 0.8;
   }
 
   svg {
-    margin-right: 15px;
+    margin-right: 8px;
+  }
+
+  /* 🔑 Fix alignment for logout button */
+  &.logout-link {
+    line-height: 1; /* normalize vertical alignment */
+    display: flex;
+    align-items: center; /* center icon + text vertically */
+    margin-top: -2px;
+  }
+`;
+
+const MenuToggle = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+
+  @media (max-width: 768px) {
+    display: block;
   }
 `;
 
 const Homebar = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const authData = queryClient.getQueryData(["isAuthenticated"]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // ✅ Check token validity
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.exp * 1000 > Date.now()) {
+          setIsAuthenticated(true);
+        } else {
+          localStorage.removeItem("token"); // expired
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error("Invalid token", err);
+        setIsAuthenticated(false);
+      }
+    }
+  }, []);
 
   const handleLogout = () => {
-    queryClient.removeQueries(["user"]);
-    queryClient.removeQueries(["isAuthenticated"]);
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
     navigate("/", { replace: true });
   };
 
@@ -76,23 +143,48 @@ const Homebar = () => {
         <LogoLink to="/home">
           <Brand>CodeSoldiers</Brand>
         </LogoLink>
-        <NavLinks>
+
+        {/* Hamburger Menu Button */}
+        <RightSection>
+
+        <MenuToggle onClick={() => setMenuOpen((prev) => !prev)}>
+          {menuOpen ? <FiX /> : <FiMenu />}
+        </MenuToggle>
+        </RightSection>
+
+        <NavLinks $open={menuOpen}>
           <NavLink>
-            <StyledLink to="/home">Home</StyledLink>
+            <StyledLink to="/home" onClick={() => setMenuOpen(false)}>
+              Home
+            </StyledLink>
           </NavLink>
           <NavLink>
-            <StyledLink to="/about">About Us</StyledLink>
+            <StyledLink to="/about" onClick={() => setMenuOpen(false)}>
+              About Us
+            </StyledLink>
           </NavLink>
           <NavLink>
-            <StyledLink to="/contact">Contact</StyledLink>
+            <StyledLink to="/contact" onClick={() => setMenuOpen(false)}>
+              Contact
+            </StyledLink>
           </NavLink>
+          {isAuthenticated && (
+            <NavLink>
+              <StyledLink
+                as="button"
+                type="button" // 🔑 prevents button default behavior
+                onClick={() => {
+                  handleLogout();
+                  setMenuOpen(false);
+                }}
+                className="logout-link"
+              >
+                <FiLogOut />
+                Logout
+              </StyledLink>
+            </NavLink>
+          )}
         </NavLinks>
-        {authData?.auth && (
-          <StyledLink onClick={handleLogout}>
-            <FiLogOut />
-            Logout
-          </StyledLink>
-        )}
       </StyledContainer>
     </Navbar>
   );

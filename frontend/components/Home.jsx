@@ -22,15 +22,25 @@ const CommonRow = styled.div`
   align-items: center;
 `;
 
-const StyledHeader = styled(CommonRow)`
-  padding: 1.6rem 2.4rem;
-  background-color: var(--color-grey-50);
-  border-bottom: 1px solid var(--color-grey-100);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  font-weight: 600;
-  color: var(--color-grey-600);
-`;
+// const StyledHeader = styled(CommonRow)`
+//   padding: 1.6rem 2.4rem;
+//   background-color: var(--color-grey-50);
+//   border-bottom: 1px solid var(--color-grey-100);
+//   text-transform: uppercase;
+//   letter-spacing: 0.6px;
+//   font-weight: 600;
+//   color: var(--color-grey-600);
+
+//   span:first-child {
+//     flex: 1;
+//     text-align: center;
+//   }
+
+//   span:last-child {
+//     text-align: right;
+//   }
+// `;
+
 
 const StyledBody = styled.section`
   margin: 0.4rem 0;
@@ -41,7 +51,7 @@ export default function Home() {
   const queryClient = useQueryClient();
 
   const fetchQuestions = async (difficulty) => {
-    const response = await api.get("/home", { params: { difficulty } });
+    const response = await api.get("/api/questions", { params: { difficulty } });
     return response.data;
   };
 
@@ -100,15 +110,11 @@ export default function Home() {
         </p>
       ) : (
         <StyledTable>
-          <StyledHeader $columns="0.9fr 1.8fr 2.2fr 1fr 1fr 1fr 1fr">
-            <span>ID</span>
-            <span>Title</span>
-            <span>Description</span>
-            <span>Difficulty</span>
-            <span>Created At</span>
-            <span>Status</span>
-            <span>Actions</span>
-          </StyledHeader>
+         {/* <StyledHeader $columns="1fr auto">
+  <span style={{ justifySelf: "center" }}>Title</span>
+  <span style={{ justifySelf: "end" }}>Difficulty</span>
+</StyledHeader> */}
+
           <StyledBody>
             {questions.length > 0 ? (
               questions.map((question) => (

@@ -17,9 +17,9 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      console.log("Submitting login with:", { email, password });
+      // console.log("Submitting login with:", { email, password });
       const response = await api.post("/api/auth/login", { email, password });
-      console.log("Login response:", response.data);
+      // console.log("Login response:", response.data);
       if (response.data.status === "success" || response.data.status === "admin") {
         const { token, email, name } = response.data;
 

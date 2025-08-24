@@ -2,48 +2,78 @@ import React, { useState } from "react";
 import "./RunTest.css";
 import { MdAccessTimeFilled } from "react-icons/md";
 
-export default function RunTest({ flag, solve, verdict, timeTaken, testcases }) {
-  const [activeCase, setActiveCase] = useState(0);
+const handleCase1 = async (setTrigger) => {
+  setTrigger(false);
+};
+const handleCase2 = async (setTrigger) => {
+  setTrigger(true);
+};
 
-  const isAccepted = flag && solve[activeCase];
-  const isWrong = flag && !solve[activeCase];
-
+export default function RunTest(props) {
+  const [trigger, setTrigger] = useState(false);
+  let accepted1 = props.flag && props.solve[0];
+  let accepted2 = props.flag && props.solve[1];
   return (
     <div className="boxx">
       <div className="buttons">
-        {testcases.map((_, idx) => (
-          <button
-            key={idx}
-            className={`case ${activeCase === idx ? "active" : ""}`}
-            onClick={() => setActiveCase(idx)}
-            disabled={activeCase === idx}
-          >
-            Case {idx + 1}
-          </button>
-        ))}
+        <button
+          className={`case ${!trigger ? "active" : ""}`}
+          onClick={() => handleCase1(setTrigger)}
+          disabled={!trigger}
+        >
+          Case1
+        </button>
+        <button
+          className={`case ${trigger ? "active" : ""}`}
+          onClick={() => handleCase2(setTrigger)}
+          disabled={trigger}
+        >
+          Case2
+        </button>
       </div>
-
       <div className="results">
-        {isAccepted && (
+        {accepted1 && !trigger && (
           <p style={{ color: "green" }}>
             Accepted &nbsp;
-            <MdAccessTimeFilled /> &nbsp;{timeTaken} s
+            <MdAccessTimeFilled /> &nbsp;{props.timeTaken} s
           </p>
         )}
-        {isWrong && <p style={{ color: "red" }}>Wrong Answer</p>}
-
+        {accepted2 && trigger && (
+          <p style={{ color: "green" }}>
+            Accepted &nbsp;
+            <MdAccessTimeFilled /> &nbsp;{props.timeTaken} s
+          </p>
+        )}
+        {props.flag && !props.solve[0] && !trigger && (
+          <p style={{ color: "red" }}>Wrong Answer</p>
+        )}
+        {props.flag && !props.solve[1] && trigger && (
+          <p style={{ color: "red" }}>Wrong Answer</p>
+        )}
         <div className="inputt">
-          <p>Input : {testcases[activeCase].input}</p>
+          <p>
+            <>Input :</>
+            &nbsp;
+            {!trigger
+              ? `${props.testcases[0].input}`
+              : `${props.testcases[1].input}`}
+          </p>
         </div>
-
-        {flag && (
+        {props.flag && (
           <div className="expected-output">
-            <p>Output : {verdict[activeCase]}</p>
+            <p>{`Output : ${
+              !trigger ? props.verdict[0] : props.verdict[1]
+            }`}</p>
           </div>
         )}
-
         <div className="expected-output">
-          <p>Expected : {testcases[activeCase].output}</p>
+          <p>
+            <>Expected :</>
+            &nbsp;
+            {!trigger
+              ? `${props.testcases[0].output}`
+              : `${props.testcases[1].output}`}
+          </p>
         </div>
       </div>
     </div>

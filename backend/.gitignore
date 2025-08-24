@@ -1,2 +1,5 @@
 .env
 node_modules
+/utils/code
+/utils/outputs
+/utils/testcases

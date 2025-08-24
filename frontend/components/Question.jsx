@@ -10,20 +10,52 @@ import Spinner from "../ui/Spinner";
 import PageNotFound from "./PageNotFound";
 import { MdAccessTimeFilled } from "react-icons/md";
 import AceEditor from "react-ace";
-import axiosHelper from "../src/utils/axiosHelper"; // ✅ JWT integrated axios
+import axiosHelper from "../src/utils/axiosHelper"; // ✅ JWT-enabled axios
 
-// Import ACE editor theme & languages
+// Import a theme and mode (language) for the editor
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/ext-language_tools";
 
-// Set ACE base path
+// Set the base path for ACE editor
 window.ace.config.set(
   "basePath",
   "https://cdn.jsdelivr.net/npm/ace-builds@1.23.1/src-noconflict/"
 );
+
+// ✅ Default templates for each language
+const defaultTemplates = {
+  cpp: `// Enter your C++ code here
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    // your code
+    return 0;
+}`,
+  c: `// Enter your C code here
+#include <stdio.h>
+
+int main() {
+    // your code
+    return 0;
+}`,
+  py: `# Enter your Python code here
+def main():
+    # your code
+    pass
+
+if __name__ == "__main__":
+    main()`,
+  java: `// Enter your Java code here
+public class Main {
+    public static void main(String[] args) {
+        // your code
+    }
+}`,
+};
 
 const handleClick = async (
   testcases,
@@ -50,8 +82,8 @@ const handleClick = async (
 
     const body = { testcases, language, code, limit };
 
-    // ✅ use axiosHelper (with JWT automatically added)
-    const response = await axiosHelper.post(`/question/${id}`, body);
+    // ✅ Use axiosHelper instead of raw axios
+    const response = await axiosHelper.post(`/api/questions/${id}`, body);
 
     checking(false);
     if (limit !== 2) setY(true);
@@ -88,8 +120,7 @@ const handleClick = async (
 };
 
 const fetchQuestion = async (id) => {
-  // ✅ use axiosHelper (JWT token included)
-  const { data } = await axiosHelper.get(`/question/${id}`);
+  const { data } = await axiosHelper.get(`/api/questions/${id}`);
   return data;
 };
 
@@ -106,9 +137,7 @@ const Question = () => {
   });
 
   const [pass, setPass] = useState(0);
-  const [code, setCode] = useState(
-    "// Enter the code here \n#include<bits/stdc++.h>\nusing namespace std;\n\nint main()\n{\n\nreturn 0;\n}"
-  );
+  const [code, setCode] = useState(defaultTemplates.cpp); // default C++
   const [solve, setSolve] = useState([]);
   const [y, setY] = useState(false);
   const [language, setLanguage] = useState("cpp");
@@ -127,12 +156,11 @@ const Question = () => {
     java: "java",
   };
 
+  // Reset editor whenever new question is fetched
   useEffect(() => {
     if (question) {
       setPass(0);
-      setCode(
-        "// Enter the code here \n#include<bits/stdc++.h>\nusing namespace std;\n\nint main()\n{\n\nreturn 0;\n}"
-      );
+      setCode(defaultTemplates[language]);
       setSolve([]);
       setY(false);
       setRunning(false);
@@ -142,7 +170,12 @@ const Question = () => {
       setVerdict([]);
       setTimeTaken(null);
     }
-  }, [question]);
+  }, [question, language]);
+
+  // ✅ Change editor template when language changes
+  useEffect(() => {
+    setCode(defaultTemplates[language]);
+  }, [language]);
 
   useEffect(() => {
     if (isError) {
@@ -151,7 +184,6 @@ const Question = () => {
   }, [isError]);
 
   if (isLoading) return <Spinner />;
-
   if (!question) return <PageNotFound />;
 
   return (
@@ -160,17 +192,44 @@ const Question = () => {
       <div className="box">
         <div className="container">
           <h1 className="titles">{question.title}</h1>
-          <pre className="description">{question.description}</pre>
+
+          {/* ✅ Description */}
+          <div className="description">
+            <h2>Description</h2>
+            <p>{question.description}</p>
+          </div>
+
+          {/* ✅ Input Format */}
+          <div className="description">
+            <p>
+              <b>Input Format :</b>
+              {question["Input Format"]}
+            </p>
+          </div>
+
+          {/* ✅ Output Format */}
+          <div className="description">
+            <p>
+              <b>Output Format :</b>
+              {question["Output Format"]}
+            </p>
+          </div>
           <ul className="unorderedlist">
             {question.testcases.slice(0, 2).map((testcase, i) => (
               <li key={i} className="List">
                 <div className="input">
                   <strong>Input</strong>
-                  <pre className="pre">{testcase.input}</pre>
+                  <pre className="pre">
+                    <br />
+                    {testcase.input}
+                  </pre>
                 </div>
                 <div className="output">
                   <strong>Output</strong>
-                  <pre>{testcase.output}</pre>
+                  <pre>
+                    <br />
+                    {testcase.output}
+                  </pre>
                 </div>
               </li>
             ))}
@@ -302,7 +361,8 @@ const Question = () => {
         >
           <div>
             <h1>Submission</h1>
-            {correct ? <div className="tick">✅</div> : <div className="wrong">❌</div>}
+            {correct && <div className="tick">✅</div>}
+            {!correct && <div className="wrong">❌</div>}
           </div>
           <table className="verdict-table">
             <thead>
@@ -320,7 +380,7 @@ const Question = () => {
                   <strong>
                     {correct
                       ? "All Test Cases Passed ✅"
-                      : "Test Cases Failed ❌"}
+                      : "Test Cases Failed ❌ "}
                   </strong>
                 </td>
               </tr>
@@ -337,11 +397,12 @@ const Question = () => {
             <div className="info">
               <p>Your Program failed for 😔:</p>
               <p>Input:</p>
-              <pre className="failed-input">
-                {question.testcases[
-                  solve.findIndex((item) => item === false)
-                ]?.input || "No failed test cases found"}
-              </pre>
+              <p className="failed-input">
+                <pre>
+                  {question.testcases[solve.findIndex((item) => item === false)]
+                    ?.input || "No failed test cases found"}
+                </pre>
+              </p>
             </div>
           )}
         </div>

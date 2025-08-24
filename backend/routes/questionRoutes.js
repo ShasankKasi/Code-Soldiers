@@ -4,8 +4,8 @@ const { getQuestions, getQuestionById, runTestcases } = require("../controllers/
 const authMiddleware = require("../middleware/authMiddleware");
 
 // Public/Protected routes
-router.get("/questions", authMiddleware, getQuestions);
-router.get("/questions/:id", authMiddleware, getQuestionById);
-router.post("/questions/:id/run", authMiddleware, runTestcases);
+router.get("/", authMiddleware, getQuestions);
+router.get("/:id", authMiddleware, getQuestionById);
+router.post("/:id", authMiddleware, runTestcases);
 
 module.exports = router;

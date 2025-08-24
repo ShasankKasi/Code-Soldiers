@@ -4,16 +4,17 @@
   background-color: white;
   padding: 20px;
   color: rgb(25, 25, 25);
-  width: 80vh;
+  width: 90%;              /* take 90% of parent/container width */
+  max-width: 700px;        /* but don’t grow beyond 700px */
   margin: 20px auto;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .buttons {
   display: flex;
-  flex-wrap: wrap;   /* ✅ allows more buttons */
   justify-content: center;
-  gap: 15px;
+  flex-wrap: wrap;          /* allow buttons to wrap on small screens */
+  gap: 10px;
   margin-bottom: 20px;
 }
 
@@ -22,7 +23,9 @@
   border-radius: 10px;
   border: 1px solid #ccc;
   cursor: pointer;
-  transition: background-color 0.2s;
+  flex: 1;                  /* let buttons expand equally */
+  min-width: 100px;         /* don’t shrink too much */
+  text-align: center;
 }
 
 .case.active {
@@ -41,8 +44,27 @@
 .inputt,
 .expected-output {
   padding: 15px;
-  font-size: 17px;
+  font-size: 1rem;          /* responsive font size */
   border-radius: 10px;
   background-color: rgb(224, 228, 231);
   margin: 10px 0;
+  word-wrap: break-word;    /* handle long inputs */
+}
+
+/* Small screen adjustments */
+@media (max-width: 600px) {
+  .boxx {
+    padding: 15px;
+  }
+
+  .case {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  .inputt,
+  .expected-output {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
 }
