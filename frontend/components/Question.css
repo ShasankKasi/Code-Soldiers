@@ -1,0 +1,121 @@
+.description {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.titles {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.compiler {
+  width: 100%;
+  max-width: 95%;
+  margin: 20px auto;
+}
+
+.submitted {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+}
+
+.c-Error {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #ffecec;
+  border: 1px solid #ff5c5c;
+  border-radius: 8px;
+  color: #b20000;
+  font-weight: 500;
+}
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  margin-left: 14vh;
+}
+
+.language-selector label {
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+.language-selector select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  outline: none;
+}
+
+.language-selector select:focus {
+  border-color: #007bff;
+}
+
+/* Button hover UX improvement */
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #333;
+  color: #fff;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.result {
+  margin-top: 25px;
+  padding: 20px;
+  background-color: #eef7ff;
+  border-radius: 8px;
+  border: 1px solid #cce5ff;
+}
+
+.result h3 {
+  margin-bottom: 15px;
+  color: #004085;
+}
+
+.result table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.result th,
+.result td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.result th {
+  background-color: #f1f1f1;
+  font-weight: bold;
+}
+
+/* ✅ Mobile responsiveness */
+@media (max-width: 768px) {
+  .language-selector {
+    margin-left: 0;
+    justify-content: center;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  .result,
+  .submitted,
+  .c-Error {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .compiler {
+    width: 100%;
+    margin: 10px auto;
+  }
+}

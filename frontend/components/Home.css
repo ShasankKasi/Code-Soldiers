@@ -1,0 +1,43 @@
+.filter-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-container button {
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #fff;
+}
+
+.filter-container button.all {
+  background-color: #007bff;
+}
+
+.filter-container button.easy {
+  background-color: #28a745;
+}
+
+.filter-container button.medium {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.filter-container button.hard {
+  background-color: #dc3545;
+}
+
+.filter-container button:hover {
+  opacity: 0.85;
+}
+
+.filter-container button.active {
+  transform: scale(1.05);
+  font-weight: bold;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15);
+}
