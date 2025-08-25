@@ -1,15 +1,13 @@
 .filter-container {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin: 20px 0;
-  flex-wrap: wrap; /* helps on smaller screens */
+  gap: 10px;
+  margin-bottom: 20px;
 }
-
 .home-container {
-  max-width: 900px;  /* limit row width */
+  max-width: 1200px;  /* limit row width */
   margin: 0 auto;    /* center on page */
-  padding: 0 20px;   /* some breathing space on sides */
+  padding: 0 1px;   /* some breathing space on sides */
 }
 
 

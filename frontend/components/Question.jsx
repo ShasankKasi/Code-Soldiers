@@ -203,16 +203,16 @@ const Question = () => {
           {/* ✅ Input Format */}
           <div className="description">
             <p>
-              <b>Input Format :</b>
-              {question["Input Format"]}
+              <b>Input Format : </b>
+              { question["Input Format"]}
             </p>
           </div>
 
           {/* ✅ Output Format */}
           <div className="description">
             <p>
-              <b>Output Format :</b>
-              {question["Output Format"]}
+              <b>Output Format : </b>
+              { question["Output Format"]}
             </p>
           </div>
           <ul className="unorderedlist">
