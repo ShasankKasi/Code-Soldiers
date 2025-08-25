@@ -148,6 +148,7 @@ const Question = () => {
   const [error, setError] = useState(false);
   const [verdict, setVerdict] = useState([]);
   const [timeTaken, setTimeTaken] = useState(null);
+  const isLoggedIn = !!localStorage.getItem("token");
 
   const modeMap = {
     cpp: "c_cpp",
@@ -274,56 +275,63 @@ const Question = () => {
 
       {/* Run & Submit Buttons */}
       <div className="buttons">
-        <button
-          type="button"
-          className="button"
-          onClick={() =>
-            handleClick(
-              question.testcases,
-              code,
-              id,
-              2,
-              setPass,
-              setRunning,
-              setVerdict,
-              setX,
-              setY,
-              setSolve,
-              setCorrect,
-              setError,
-              setTimeTaken,
-              language
-            )
-          }
-        >
-          {running ? <SpinnerMini /> : "Run"}
-        </button>
-        <button
-          type="button"
-          className="button"
-          onClick={() =>
-            handleClick(
-              question.testcases,
-              code,
-              id,
-              question.testcases.length,
-              setPass,
-              setSubmitting,
-              setVerdict,
-              setX,
-              setY,
-              setSolve,
-              setCorrect,
-              setError,
-              setTimeTaken,
-              language
-            )
-          }
-        >
-          {submitting ? <SpinnerMini /> : "Submit"}
-        </button>
-      </div>
-
+  {isLoggedIn ? (
+    <>
+      <button
+        type="button"
+        className="button"
+        onClick={() =>
+          handleClick(
+            question.testcases,
+            code,
+            id,
+            2,
+            setPass,
+            setRunning,
+            setVerdict,
+            setX,
+            setY,
+            setSolve,
+            setCorrect,
+            setError,
+            setTimeTaken,
+            language
+          )
+        }
+      >
+        {running ? <SpinnerMini /> : "Run"}
+      </button>
+      <button
+        type="button"
+        className="button"
+        onClick={() =>
+          handleClick(
+            question.testcases,
+            code,
+            id,
+            question.testcases.length,
+            setPass,
+            setSubmitting,
+            setVerdict,
+            setX,
+            setY,
+            setSolve,
+            setCorrect,
+            setError,
+            setTimeTaken,
+            language
+          )
+        }
+      >
+        {submitting ? <SpinnerMini /> : "Submit"}
+      </button>
+    </>
+  ) : (
+    <div className="locked-editor">
+      🔒 <span>Please <a href="/login">login</a> to unlock editor</span>
+    </div>
+  )}
+</div>
       {/* Compilation Error */}
       {error && (
         <div className="c-Error">

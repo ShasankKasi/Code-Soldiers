@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "../components/Home";
 import Admin from "../components/Admin";
 import Forgot from "../components/Forgot";
@@ -23,38 +23,26 @@ const queryClient = new QueryClient({
   },
 });
 
-// Utility to check if user is logged in
-const isAuthenticated = () => {
-  return !!localStorage.getItem("token"); // or however you store the token
-};
-
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <Router>
         <Routes>
-          {/* Dynamic root route */}
-          <Route
-            path="/"
-            element={
-              isAuthenticated() ? (
-                <Navigate to="/home" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
           {/* Public routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/verify" element={<Verify />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
 
-          {/* Private routes */}
+          {/* Public question page (editor locked if not logged in) */}
+          <Route path="/question/:id" element={<Question />} />
+
+          {/* Private routes (restricted) */}
           <Route
             path="/admin"
             element={
@@ -63,29 +51,13 @@ export default function App() {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/home"
-            element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/question/:id"
-            element={
-              <PrivateRoute>
-                <Question />
-              </PrivateRoute>
-            }
-          />
 
-          {/* Catch-all route */}
+          {/* Catch-all */}
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Router>
 
-      {/* Global toaster for notifications */}
+      {/* Global toaster */}
       <Toaster
         position="top-center"
         gutter={12}

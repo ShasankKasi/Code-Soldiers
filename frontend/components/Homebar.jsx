@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import { FiLogOut, FiLogIn, FiMenu, FiX } from "react-icons/fi";
 import { jwtDecode } from "jwt-decode";
 
 const Navbar = styled.nav`
@@ -49,10 +49,11 @@ const NavLinks = styled.ul`
     z-index: 100;
   }
 `;
+
 const RightSection = styled.div`
   display: flex;
   align-items: center;
-  margin-left: auto; /* pushes to rightmost */
+  margin-left: auto;
 `;
 
 const NavLink = styled.li`
@@ -62,6 +63,7 @@ const NavLink = styled.li`
     margin: 0.8rem 0;
   }
 `;
+
 const StyledLink = styled(Link)`
   display: flex;
   align-items: center;
@@ -85,11 +87,10 @@ const StyledLink = styled(Link)`
     margin-right: 8px;
   }
 
-  /* 🔑 Fix alignment for logout button */
   &.logout-link {
-    line-height: 1; /* normalize vertical alignment */
     display: flex;
-    align-items: center; /* center icon + text vertically */
+    align-items: center;
+    line-height: 1;
     margin-top: -2px;
   }
 `;
@@ -112,7 +113,6 @@ const Homebar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // ✅ Check token validity
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -121,7 +121,7 @@ const Homebar = () => {
         if (decoded.exp * 1000 > Date.now()) {
           setIsAuthenticated(true);
         } else {
-          localStorage.removeItem("token"); // expired
+          localStorage.removeItem("token");
           setIsAuthenticated(false);
         }
       } catch (err) {
@@ -144,12 +144,10 @@ const Homebar = () => {
           <Brand>CodeSoldiers</Brand>
         </LogoLink>
 
-        {/* Hamburger Menu Button */}
         <RightSection>
-
-        <MenuToggle onClick={() => setMenuOpen((prev) => !prev)}>
-          {menuOpen ? <FiX /> : <FiMenu />}
-        </MenuToggle>
+          <MenuToggle onClick={() => setMenuOpen((prev) => !prev)}>
+            {menuOpen ? <FiX /> : <FiMenu />}
+          </MenuToggle>
         </RightSection>
 
         <NavLinks $open={menuOpen}>
@@ -168,11 +166,12 @@ const Homebar = () => {
               Contact
             </StyledLink>
           </NavLink>
-          {isAuthenticated && (
+
+          {isAuthenticated ? (
             <NavLink>
               <StyledLink
                 as="button"
-                type="button" // 🔑 prevents button default behavior
+                type="button"
                 onClick={() => {
                   handleLogout();
                   setMenuOpen(false);
@@ -181,6 +180,17 @@ const Homebar = () => {
               >
                 <FiLogOut />
                 Logout
+              </StyledLink>
+            </NavLink>
+          ) : (
+            <NavLink>
+              <StyledLink
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="logout-link"
+              >
+                <FiLogIn />
+                Login
               </StyledLink>
             </NavLink>
           )}

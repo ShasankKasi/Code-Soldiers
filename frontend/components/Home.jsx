@@ -76,10 +76,10 @@ export default function Home() {
     setDifficulty(newDifficulty);
     queryClient.invalidateQueries(["questions"]);
   };
-
-  return (
-    <div>
-      <Homebar />
+return (
+  <div>
+    <Homebar />
+    <div className="home-container">
       <h1
         style={{
           textAlign: "center",
@@ -94,7 +94,9 @@ export default function Home() {
         {["all", "easy", "medium", "hard"].map((level) => (
           <button
             key={level}
-            className={`${level} ${difficulty === level ? `active ${level}` : ""}`}
+            className={`${level} ${
+              difficulty === level ? `active ${level}` : ""
+            }`}
             onClick={() => handleFilterChange(level)}
           >
             {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -110,11 +112,6 @@ export default function Home() {
         </p>
       ) : (
         <StyledTable>
-         {/* <StyledHeader $columns="1fr auto">
-  <span style={{ justifySelf: "center" }}>Title</span>
-  <span style={{ justifySelf: "end" }}>Difficulty</span>
-</StyledHeader> */}
-
           <StyledBody>
             {questions.length > 0 ? (
               questions.map((question) => (
@@ -129,5 +126,6 @@ export default function Home() {
         </StyledTable>
       )}
     </div>
-  );
+  </div>
+);
 }
