@@ -9,6 +9,9 @@ import toast from "react-hot-toast";
 const Navbar = styled.nav`
   background-color: #008bff;
   padding: 1rem 0;
+    z-index: 1000; /* so it stays above other content */
+  position: sticky;
+  top: 0;
 `;
 
 const StyledContainer = styled.div`
