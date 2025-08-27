@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { FiLogOut, FiLogIn, FiMenu, FiX } from "react-icons/fi";
 import { jwtDecode } from "jwt-decode";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const Navbar = styled.nav`
   background-color: #008bff;
@@ -112,7 +114,7 @@ const Homebar = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  const queryClient = useQueryClient();
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -131,9 +133,11 @@ const Homebar = () => {
     }
   }, []);
 
-  const handleLogout = () => {
+const handleLogout = () => {
     localStorage.removeItem("token");
+    queryClient.removeQueries(["user"]); // <-- clear user from cache
     setIsAuthenticated(false);
+    toast.success("You have been logged out."); // <-- toast message
     navigate("/", { replace: true });
   };
 
