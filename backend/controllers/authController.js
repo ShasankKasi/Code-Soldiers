@@ -34,7 +34,7 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) return res.json({ status: "doesnotexist" });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -66,7 +66,7 @@ exports.forgotPassword = async (req, res) => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
     // Store OTP before sending email
-    otpStore[email] = otp;
+otpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 }; // 5 min expiry
 
     // --- Send Email ---
     const transporter = nodemailer.createTransport({
@@ -100,11 +100,9 @@ exports.verifyOtp = async (req, res) => {
   // console.log("Verifying OTP for:", email, number);
 
   try {
-    const storedOtp = otpStore[email];
-    // console.log("Stored OTP:", storedOtp);
-
-    if (storedOtp && storedOtp === number.trim()) {
-      delete otpStore[email]; // remove OTP after successful verification
+   const record = otpStore[email];
+if (record && record.otp === number.trim() && Date.now() < record.expires) {
+  delete otpStore[email];
       const user = await User.findOne({ email });
       return res.json({ status: "success", email: user.email, name: user.name });
     } else {
