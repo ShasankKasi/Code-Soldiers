@@ -11,6 +11,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const queryClient = useQueryClient();
 
   async function handleSubmit(e) {
@@ -78,16 +79,23 @@ export default function Login() {
                   required
                 />
               </div>
-              <div className="input-container">
+              <div className="input-container password-container">
                 <FaLock className="password-icon" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Password"
-                  className="name"
+                  className="name password-input-login"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <button
+                  type="button"
+                  className="toggle-password-login"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "👁️" : "👁️‍🗨️"}
+                </button>
               </div>
               <div className="login-button">
                 <button type="submit">Login</button>

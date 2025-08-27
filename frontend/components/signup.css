@@ -48,7 +48,7 @@ form {
   width: calc(100% - 40px);
   height: 30px;
   border-radius: 1px;
-  box-shadow: inset 0px 0px 6px rgba(0, 0, 0, 0.1); /* Reduced box shadow */
+  box-shadow: inset 0px 0px 6px rgba(0, 0, 0, 0.1);
   border: 1px solid #ddd;
   outline: none;
   background-color: #fff;
@@ -56,6 +56,7 @@ form {
   padding-left: 20px;
   padding-right: 20px;
   font-size: 16px;
+  box-sizing: border-box;
 }
 
 .input-field::placeholder {
@@ -94,4 +95,37 @@ form {
 
 .link:hover {
   text-decoration: underline;
+}
+
+/* Password input group styles */
+.password-input-group {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.password-input {
+  width: calc(100% - 40px) !important; /* Same width as other fields */
+  padding-right: 50px !important; /* Extra space for eye button */
+  padding-left: 20px !important;
+  margin-bottom: 0 !important; /* Remove margin since the container has it */
+}
+
+.toggle-password-signup {
+  position: absolute;
+  right: 35px;
+  top: 30%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 5px;
+  color: #666;
+  transition: color 0.3s;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

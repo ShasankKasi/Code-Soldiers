@@ -12,6 +12,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,21 +71,30 @@ const Signup = () => {
               required
               className="input-field"
             />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              minLength={8}
-              required
-              className="input-field"
-            />
+            <div className="password-input-group">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                minLength={8}
+                required
+                className="input-field password-input"
+              />
+              <button
+                type="button"
+                className="toggle-password-signup"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
             <button type="submit" className="submit-button">
               Sign Up
             </button>
           </form>
           {error && <p className="error-message">{error}</p>}
-          <Link to="/" className="link">
+          <Link to="/login" className="link">
             Already have an account? Log in here
           </Link>
         </div>
