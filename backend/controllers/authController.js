@@ -114,3 +114,30 @@ if (record && record.otp === number.trim() && Date.now() < record.expires) {
   }
 };
 
+
+exports.resetPassword = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    if (!email || !password) {
+      return res.json({ status: "emptyerror" });
+    }
+
+    if (password.length < 8) {
+      return res.json({ status: "passerror" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ status: "doesnotexist" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.json({ status: "success" });
+  } catch (error) {
+    return res.status(500).json({ status: "fail" });
+  }
+}

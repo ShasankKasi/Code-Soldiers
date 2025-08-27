@@ -14,6 +14,7 @@ import PageNotFound from "../components/PageNotFound";
 import Login from "../components/Login";
 import PrivateRoute from "../src/utils/PrivateRoute";
 import Signup from "../components/signup";
+import ResetPassword from "../components/ResetPassword";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot" element={<Forgot />} />
           {/* <Route path="/verify" element={<Verify />} /> */}
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
 

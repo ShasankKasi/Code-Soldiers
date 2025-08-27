@@ -3,12 +3,12 @@ import "./Forgot.css";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Homebar from "./Homebar";
-import { useQueryClient } from "@tanstack/react-query";
+// import { useQueryClient } from "@tanstack/react-query";
 import api from "../src/utils/axiosHelper";
 
 export default function Forgot() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -38,39 +38,33 @@ export default function Forgot() {
   }
 
   async function handleOtpSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (otp.length !== 4 || isNaN(otp)) {
-      toast.error("Please enter a valid 4-digit OTP");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await api.post("/api/auth/verify", { email, number: otp });
-
-      if (response.data?.status === "success") {
-        toast.success("Verification done ✅");
-
-        // cache user
-        queryClient.setQueryData(["user"], {
-          email: response.data.email,
-          name: response.data.name,
-        });
-        queryClient.setQueryData(["isAuthenticated"], { auth: true });
-
-        navigate("/home", {
-          state: { email: response.data.email, name: response.data.name },
-        });
-      } else {
-        toast.error("OTP is incorrect");
-      }
-    } catch (error) {
-      toast.error(error.message || "Unknown error occurred");
-    } finally {
-      setLoading(false);
-    }
+  if (otp.length !== 4 || isNaN(otp)) {
+    toast.error("Please enter a valid 4-digit OTP");
+    return;
   }
+
+  setLoading(true);
+  try {
+    const response = await api.post("/api/auth/verify", { email, number: otp });
+
+    if (response.data?.status === "success") {
+      toast.success("OTP verified successfully! ✅");
+
+      // Redirect to reset password page with email
+      navigate("/reset-password", {
+        state: { email: email }
+      });
+    } else {
+      toast.error("OTP is incorrect");
+    }
+  } catch (error) {
+    toast.error(error.message || "Unknown error occurred");
+  } finally {
+    setLoading(false);
+  }
+}
 
   async function handleResendOtp() {
     try {
