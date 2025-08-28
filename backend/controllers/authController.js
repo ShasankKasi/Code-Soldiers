@@ -6,27 +6,62 @@ const SenderEmail = process.env.SenderEmail; // set in .env
 const passkey = process.env.adminPass; // set in .env
 const nodemailer = require("nodemailer");
 
-const otpStore = {};
+// const otpStore = {};
+// In your auth controller
+const otpStore = {}; // already exists
 
-exports.signup = async (req, res) => {
-  const { name, email, password } = req.body;
-  // console.log("Signup request received:", req.body);
+exports.sendSignupOtp = async (req, res) => {
+  const { email } = req.body;
+
   try {
-    if (!name || !email || !password) {
-      return res.json({ status: "emptyerror" });
-    }
-
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.json({ status: "exist" });
 
-    if (password.length < 8) return res.json({ status: "passerror" });
+    // Generate OTP
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    await User.create({ name, email, password: hashedPassword });
+    otpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 };
 
-    return res.json({ status: "success" });
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: String(SenderEmail),
+        pass: String(passkey),
+      },
+    });
+
+    const mailOptions = {
+      from: String(SenderEmail),
+      to: email,
+      subject: "Signup Verification - OTP",
+      text: `Hi, your OTP for signup is ${otp}. Please do not share it.`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ status: "otpsent" });
   } catch (error) {
-    return res.status(500).json({ status: "fail" });
+    res.json({ status: "fail" });
+  }
+};
+
+exports.verifySignupOtp = async (req, res) => {
+  const { email, number, name, password } = req.body;
+
+  try {
+    const record = otpStore[email];
+    if (record && record.otp === number.trim() && Date.now() < record.expires) {
+      delete otpStore[email];
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await User.create({ name, email, password: hashedPassword });
+
+      return res.json({ status: "success" });
+    } else {
+      return res.json({ status: "otpincorrect" });
+    }
+  } catch (error) {
+    res.status(500).json({ status: "error" });
   }
 };
 

@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { signup, login, forgotPassword, verifyOtp,resetPassword } = require("../controllers/authController");
+const { login, forgotPassword, verifyOtp,resetPassword ,verifySignupOtp, sendSignupOtp } = require("../controllers/authController");
 
 // Auth-related routes
-router.post("/signup", signup);
+router.post("/verifySignupOtp", verifySignupOtp);
+router.post("/sendSignupOtp", sendSignupOtp);
 router.post("/login", login);
 router.post("/forgot", forgotPassword);
 router.post("/verify", verifyOtp);

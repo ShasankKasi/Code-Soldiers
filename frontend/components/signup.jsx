@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import Homebar from "./Homebar";
-import axiosHelper from "../src/utils/axiosHelper"; // ✅ import your helper
+import axiosHelper from "../src/utils/axiosHelper";
+import SpinnerMini from "../ui/SpinnerMini"; // ✅ import your mini spinner
 import "./signup.css";
 
 const Signup = () => {
@@ -12,70 +14,80 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [showOtpStep, setShowOtpStep] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // ✅ new state for spinner
 
   const validatePassword = (password) => {
-    if (password.length < 8) {
-      return "Password must be at least 8 characters long";
-    }
-    if (!/(?=.*[a-z])/.test(password)) {
-      return "Password must contain at least one lowercase letter";
-    }
-    if (!/(?=.*[A-Z])/.test(password)) {
-      return "Password must contain at least one uppercase letter";
-    }
-    if (!/(?=.*\d)/.test(password)) {
-      return "Password must contain at least one number";
-    }
+    if (password.length < 8) return "Password must be at least 8 characters long";
+    if (!/(?=.*[a-z])/.test(password)) return "Password must contain at least one lowercase letter";
+    if (!/(?=.*[A-Z])/.test(password)) return "Password must contain at least one uppercase letter";
+    if (!/(?=.*\d)/.test(password)) return "Password must contain at least one number";
     return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // ✅ show spinner on submit
 
-    // Client-side password validation
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      toast.error(passwordError);
+    if (showOtpStep) {
+      // Step 2: Verify OTP
+      try {
+        const response = await axiosHelper.post("/api/auth/verifySignupOtp", {
+          email,
+          name,
+          password,
+          number: otp,
+        });
+
+        if (response.data.status === "success") {
+          toast.success("Signup successful! Please log in.");
+          navigate("/login");
+        } else {
+          toast.error("Invalid or expired OTP.");
+        }
+      } catch (err) {
+        toast.error("Error verifying OTP. Try again.");
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
-    // Check if passwords match
+    // Step 1: Send OTP
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      toast.error(passwordError);
+      setLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
+      setLoading(false);
       return;
     }
 
     try {
-      // console.log("Submitting signup with:", { name, email, password });
-      const response = await axiosHelper.post("/api/auth/signup", {
-        name,
+      const response = await axiosHelper.post("/api/auth/sendSignupOtp", {
         email,
-        password,
       });
-    // console.log("Signup response:", response.data);
-      switch (response.data.status) {
-        case "exist":
-          toast.error("User already exists");
-          break;
-        case "success":
-          toast.success("Signup successful! Please log in.");
-          navigate("/login");
-          break;
-        case "passerror":
-          toast.error("Password should be at least 8 characters");
-          break;
-        case "emptyerror":
-          toast.error("Please fill in all fields");
-          break;
-        default:
-          toast.error("Unexpected error occurred. Try again.");
+
+      if (response.data.status === "otpsent") {
+        toast.success("OTP sent to your email!");
+        setShowOtpStep(true);
+      } else if (response.data.status === "exist") {
+        toast.error("User already exists");
+      } else {
+        toast.error("Error sending OTP");
       }
     } catch (err) {
-      setError(err.message || "Something went wrong");
-      toast.error("Error in details entered. Please check the details again");
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false); // ✅ stop spinner
     }
   };
 
@@ -85,93 +97,91 @@ const Signup = () => {
       <div className="main">
         <div className="sub-main">
           <img src="/logo.png" alt="Logo" className="profile-icon" />
-          <h1>Sign Up</h1>
+          <h1>{showOtpStep ? "Verify Email" : "Sign Up"}</h1>
+
           <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Name"
-              required
-              className="input-field"
-            />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              required
-              className="input-field"
-            />
-            <div className="password-input-group">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                minLength={8}
-                required
-                className="input-field password-input"
-              />
-              <button
-                type="button"
-                className="toggle-password-signup"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "👁️" : "👁️‍🗨️"}
-              </button>
-            </div>
-            <div className="password-input-group">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm Password"
-                minLength={8}
-                required
-                className="input-field password-input"
-              />
-              <button
-                type="button"
-                className="toggle-password-signup"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
-              </button>
-            </div>
+            {!showOtpStep ? (
+              <>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Name"
+                  required
+                  className="input-field"
+                />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                  required
+                  className="input-field"
+                />
 
-            {/* Password Requirements */}
-            <div className="password-requirements">
-              <p>Password must contain:</p>
-              <ul>
-                <li className={password.length >= 8 ? "valid" : ""}>
-                  At least 8 characters
-                </li>
-                <li className={/(?=.*[a-z])/.test(password) ? "valid" : ""}>
-                  One lowercase letter
-                </li>
-                <li className={/(?=.*[A-Z])/.test(password) ? "valid" : ""}>
-                  One uppercase letter
-                </li>
-                <li className={/(?=.*\d)/.test(password) ? "valid" : ""}>
-                  One number
-                </li>
-              </ul>
-              {confirmPassword && (
-                <p className={password === confirmPassword ? "password-match valid" : "password-match invalid"}>
-                  {password === confirmPassword ? "✓ Passwords match" : "✗ Passwords do not match"}
-                </p>
-              )}
-            </div>
+                <div className="password-input-group">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    minLength={8}
+                    required
+                    className="input-field password-input"
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password-signup"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
 
-            <button type="submit" className="submit-button">
-              Sign Up
+                <div className="password-input-group">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm Password"
+                    minLength={8}
+                    required
+                    className="input-field password-input"
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password-signup"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter OTP"
+                  required
+                  className="input-field"
+                />
+              </>
+            )}
+
+            <button type="submit" className="submit-button" disabled={loading}>
+              {loading ? <SpinnerMini /> : showOtpStep ? "Verify OTP" : "Sign Up"}
             </button>
           </form>
+
           {error && <p className="error-message">{error}</p>}
-          <Link to="/login" className="link">
-            Already have an account? Log in here
-          </Link>
+
+          {!showOtpStep && (
+            <Link to="/login" className="link">
+              Already have an account? Log in here
+            </Link>
+          )}
         </div>
       </div>
     </div>

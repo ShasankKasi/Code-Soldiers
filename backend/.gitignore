@@ -1,5 +1,5 @@
 .env
 node_modules
-/utils/code
+/utils/codes
 /utils/outputs
 /utils/testcases
