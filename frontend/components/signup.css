@@ -19,7 +19,7 @@ body {
   flex-direction: column;
   height: auto;
   width: 90%;
-  max-width: 400px;
+  max-width: 450px; /* Slightly wider to accommodate requirements */
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
   padding: 6vh;
   border-radius: 1px;
@@ -29,8 +29,8 @@ body {
 }
 
 .profile-icon {
-  height: 150px;
-  width: 150px;
+  height: 100px; /* Reduced from 150px to save space */
+  width: 100px;
   border-radius: 50%;
 }
 
@@ -114,7 +114,7 @@ form {
 .toggle-password-signup {
   position: absolute;
   right: 35px;
-  top: 30%;
+  top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
@@ -128,4 +128,89 @@ form {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.toggle-password-signup:hover {
+  color: #007bff;
+}
+
+/* Password requirements styles */
+.password-requirements {
+  text-align: left;
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.password-requirements p {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.password-requirements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px 0;
+}
+
+.password-requirements li {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+  padding-left: 18px;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.password-requirements li:before {
+  content: "✗";
+  position: absolute;
+  left: 0;
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.password-requirements li.valid {
+  color: #28a745;
+}
+
+.password-requirements li.valid:before {
+  content: "✓";
+  color: #28a745;
+}
+
+.password-match {
+  font-size: 13px;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+.password-match.valid {
+  color: #28a745;
+}
+
+.password-match.invalid {
+  color: #dc3545;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .sub-main {
+    margin: 5vh 20px;
+    padding: 4vh 20px;
+    max-width: none;
+  }
+  
+  .profile-icon {
+    height: 80px;
+    width: 80px;
+  }
+  
+  .password-requirements {
+    padding: 12px;
+  }
 }
