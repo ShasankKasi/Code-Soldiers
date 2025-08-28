@@ -26,7 +26,6 @@ export default function Home() {
   const [difficulty, setDifficulty] = useState(difficultyParam);
 
   useEffect(() => {
-    // Keep state in sync with URL param
     setDifficulty(difficultyParam);
   }, [difficultyParam]);
 
@@ -45,15 +44,16 @@ export default function Home() {
     refetchOnWindowFocus: false,
   });
 
+  // Replace with your real user API call later
   const { data: cachedUser } = useQuery({
     queryKey: ["user"],
-    queryFn: () => Promise.resolve({ name: "Guest" }),
+    queryFn: () => Promise.resolve({ name: null }), 
     staleTime: Infinity,
     cacheTime: Infinity,
   });
 
   const handleFilterChange = (newDifficulty) => {
-    setSearchParams({ difficulty: newDifficulty }); // updates URL
+    setSearchParams({ difficulty: newDifficulty });
     setDifficulty(newDifficulty);
   };
 
@@ -69,11 +69,13 @@ export default function Home() {
           }}
         >
           Welcome{" "}
-          <span style={{ color: "#008bff", fontWeight: "600" }}>
-            {cachedUser?.name}
-          </span>{" "}
+          {cachedUser?.name ? (
+            <span style={{ color: "#008bff", fontWeight: "600" }}>
+              {cachedUser.name}
+            </span>
+          ) : null}{" "}
           ✨
-          {cachedUser?.name !== "Guest" ? "" : (
+          {/* {!cachedUser?.name && (
             <span
               style={{
                 fontSize: "16px",
@@ -84,7 +86,7 @@ export default function Home() {
             >
               ( Log in to unlock more features 🚀)
             </span>
-          )}
+          )} */}
         </h1>
 
         <div className="filter-container">
