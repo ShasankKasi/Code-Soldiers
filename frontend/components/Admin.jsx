@@ -9,6 +9,8 @@ export default function Admin() {
   const [input, setInput] = useState([]);
   const [output, setOutput] = useState([]);
   const [difficulty, setDifficulty] = useState("easy");
+  const [inputFormat, setInputFormat] = useState("");   // ✅ new
+  const [outputFormat, setOutputFormat] = useState(""); // ✅ new
 
   const handleChange = (event) => {
     setDifficulty(event.target.value);
@@ -26,12 +28,18 @@ export default function Admin() {
     }
 
     try {
-      const response = await api.post("/admin", {
+      // console.log(inputFormat, outputFormat);
+      
+      const response = await api.post("/api/admin/questions", {
         title,
         description,
         testcases,
         difficulty,
+        inputFormat,   // ✅ include
+        outputFormat,  // ✅ include
       });
+      // console.log(response.data);
+      
 
       if (response.data.status === "success") {
         toast.success("✅ Question Submitted Successfully!");
@@ -40,6 +48,8 @@ export default function Admin() {
         setInput([]);
         setOutput([]);
         setDifficulty("easy");
+        setInputFormat("");   // reset
+        setOutputFormat("");  // reset
       }
     } catch (e) {
       console.error(e);
@@ -50,16 +60,41 @@ export default function Admin() {
   return (
     <div>
       <Homebar />
-      <div style={{ maxWidth: "900px", margin: "2rem auto", padding: "2rem", background: "#f9f9f9", borderRadius: "12px", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
-        <h2 style={{ textAlign: "center", marginBottom: "1.5rem", color: "#333" }}>Admin Panel - Add New Question</h2>
+      <div
+        style={{
+          maxWidth: "900px",
+          margin: "2rem auto",
+          padding: "2rem",
+          background: "#f9f9f9",
+          borderRadius: "12px",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            marginBottom: "1.5rem",
+            color: "#333",
+          }}
+        >
+          Admin Panel - Add New Question
+        </h2>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+        >
           <input
             type="text"
             placeholder="Title of Question"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            style={{ padding: "10px", fontSize: "1rem", borderRadius: "8px", border: "1px solid #ccc" }}
+            style={{
+              padding: "10px",
+              fontSize: "1rem",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+            }}
           />
 
           <textarea
@@ -67,12 +102,52 @@ export default function Admin() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={5}
-            style={{ padding: "10px", fontSize: "1rem", borderRadius: "8px", border: "1px solid #ccc" }}
+            style={{
+              padding: "10px",
+              fontSize: "1rem",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+            }}
+          />
+
+          {/* ✅ Input Format */}
+          <textarea
+            placeholder="Describe the Input Format..."
+            value={inputFormat}
+            onChange={(e) => setInputFormat(e.target.value)}
+            rows={3}
+            style={{
+              padding: "10px",
+              fontSize: "1rem",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+            }}
+          />
+
+          {/* ✅ Output Format */}
+          <textarea
+            placeholder="Describe the Output Format..."
+            value={outputFormat}
+            onChange={(e) => setOutputFormat(e.target.value)}
+            rows={3}
+            style={{
+              padding: "10px",
+              fontSize: "1rem",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+            }}
           />
 
           <h3 style={{ marginTop: "1rem", color: "#444" }}>Test Cases</h3>
           {Array.from({ length: 5 }, (_, i) => (
-            <div key={i} style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                gap: "1rem",
+                marginBottom: "1rem",
+              }}
+            >
               <textarea
                 placeholder={`Input ${i + 1}`}
                 value={input[i] || ""}
@@ -82,7 +157,12 @@ export default function Admin() {
                   setInput(newInput);
                 }}
                 rows={2}
-                style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                }}
               />
               <textarea
                 placeholder={`Output ${i + 1}`}
@@ -93,18 +173,31 @@ export default function Admin() {
                   setOutput(newOutput);
                 }}
                 rows={2}
-                style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                }}
               />
             </div>
           ))}
 
-          <label htmlFor="difficulty" style={{ fontWeight: "bold" }}>Select Difficulty Level:</label>
+          <label htmlFor="difficulty" style={{ fontWeight: "bold" }}>
+            Select Difficulty Level:
+          </label>
           <select
             id="difficulty"
             name="difficulty"
             value={difficulty}
             onChange={handleChange}
-            style={{ padding: "10px", fontSize: "1rem", borderRadius: "8px", border: "1px solid #ccc", maxWidth: "200px" }}
+            style={{
+              padding: "10px",
+              fontSize: "1rem",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              maxWidth: "200px",
+            }}
           >
             <option value="easy">🟢 Easy</option>
             <option value="medium">🟡 Medium</option>
@@ -113,7 +206,16 @@ export default function Admin() {
 
           <button
             type="submit"
-            style={{ marginTop: "1rem", padding: "12px", background: "#4CAF50", color: "white", fontSize: "1rem", borderRadius: "8px", border: "none", cursor: "pointer" }}
+            style={{
+              marginTop: "1rem",
+              padding: "12px",
+              background: "#4CAF50",
+              color: "white",
+              fontSize: "1rem",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             🚀 Submit Question
           </button>

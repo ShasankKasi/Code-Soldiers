@@ -10,21 +10,34 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch users" });
   }
 };
-
 // ✅ Add question (admin only)
 exports.addQuestion = async (req, res) => {
   try {
-    const { title, description, testcases } = req.body;
+    const { title, description, testcases, difficulty, inputFormat, outputFormat } = req.body;
 
-    if (!title || !description || !testcases) {
+    if (!title || !description || !testcases || !difficulty || !inputFormat || !outputFormat) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const question = new Question({ title, description, testcases });
-    await question.save();
+    const question = new Question({
+      title,
+      description,
+      testcases,
+      difficulty, // <-- fix case
+      "Input Format": inputFormat,   // ✅ map correctly
+      "Output Format": outputFormat, // ✅ map correctly
+    });
 
+    await question.save();
     res.status(201).json({ status: "success", question });
   } catch (err) {
-    res.status(500).json({ message: "Failed to add question" });
+    console.error("❌ Error in addQuestion:", err);
+    res.status(500).json({ message: "Failed to add question", error: err.message });
   }
 };
+
+// // helper: ensure correct case for enum
+// function capitalizeDifficulty(difficulty) {
+//   if (!difficulty) return "";
+//   return difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
+// }

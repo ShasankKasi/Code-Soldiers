@@ -80,7 +80,8 @@ const user = await User.findOne({ email: email.toLowerCase() });
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
-
+    // console.log(user.email,process.env.adminEmail);
+    
     if (email === process.env.adminEmail) {
       return res.json({ status: "admin", email: user.email, name: user.name, token });
     }

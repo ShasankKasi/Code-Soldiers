@@ -9,7 +9,14 @@ const questionSchema = new mongoose.Schema(
         input: { type: String, required: true },
         output: { type: String, required: true }
       }
-    ]
+    ],
+    difficulty: { 
+      type: String, 
+      enum: ["Easy", "Medium", "Hard"], 
+      required: true 
+    },
+    "Input Format": { type: String, required: true },  // ✅ space in key
+    "Output Format": { type: String, required: true } // ✅ space in key
   },
   { timestamps: true }
 );
