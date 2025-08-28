@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Homebar from "./Homebar";
 import "./Home.css";
 import QuestionRow from "./QuestionRow";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Spinner from "../ui/Spinner";
 import styled from "styled-components";
-import api from "../src/utils/axiosHelper"; // <-- use axiosHelper
+import api from "../src/utils/axiosHelper";
 
 const StyledTable = styled.div`
   border: 1px solid var(--color-grey-200);
@@ -15,42 +16,21 @@ const StyledTable = styled.div`
   overflow: hidden;
 `;
 
-const CommonRow = styled.div`
-  display: grid;
-  grid-template-columns: ${(props) => props.$columns};
-  column-gap: 2.4rem;
-  align-items: center;
-`;
-
-// const StyledHeader = styled(CommonRow)`
-//   padding: 1.6rem 2.4rem;
-//   background-color: var(--color-grey-50);
-//   border-bottom: 1px solid var(--color-grey-100);
-//   text-transform: uppercase;
-//   letter-spacing: 0.6px;
-//   font-weight: 600;
-//   color: var(--color-grey-600);
-
-//   span:first-child {
-//     flex: 1;
-//     text-align: center;
-//   }
-
-//   span:last-child {
-//     text-align: right;
-//   }
-// `;
-
-
 const StyledBody = styled.section`
   margin: 0.4rem 0;
 `;
 
 export default function Home() {
-  const [difficulty, setDifficulty] = useState("all");
-  const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const difficultyParam = searchParams.get("difficulty") || "all";
+  const [difficulty, setDifficulty] = useState(difficultyParam);
 
-  const fetchQuestions = async (difficulty) => {
+  useEffect(() => {
+    // Keep state in sync with URL param
+    setDifficulty(difficultyParam);
+  }, [difficultyParam]);
+
+  const fetchQuestions = async () => {
     const response = await api.get("/api/questions", { params: { difficulty } });
     return response.data;
   };
@@ -61,7 +41,7 @@ export default function Home() {
     error,
   } = useQuery({
     queryKey: ["questions", difficulty],
-    queryFn: () => fetchQuestions(difficulty),
+    queryFn: fetchQuestions,
     refetchOnWindowFocus: false,
   });
 
@@ -73,59 +53,76 @@ export default function Home() {
   });
 
   const handleFilterChange = (newDifficulty) => {
+    setSearchParams({ difficulty: newDifficulty }); // updates URL
     setDifficulty(newDifficulty);
-    queryClient.invalidateQueries(["questions"]);
   };
-return (
-  <div>
-    <Homebar />
-    <div className="home-container">
-      <h1
-        style={{
-          textAlign: "center",
-          marginBottom: "20px",
-          textTransform: "capitalize",
-        }}
-      >
-        Welcome {cachedUser?.name}
-      </h1>
 
-      <div className="filter-container">
-        {["all", "easy", "medium", "hard"].map((level) => (
-          <button
-            key={level}
-            className={`${level} ${
-              difficulty === level ? `active ${level}` : ""
-            }`}
-            onClick={() => handleFilterChange(level)}
-          >
-            {level.charAt(0).toUpperCase() + level.slice(1)}
-          </button>
-        ))}
+  return (
+    <div>
+      <Homebar />
+      <div className="home-container">
+        <h1
+          style={{
+            textAlign: "center",
+            marginBottom: "20px",
+            textTransform: "capitalize",
+          }}
+        >
+          Welcome{" "}
+          <span style={{ color: "#008bff", fontWeight: "600" }}>
+            {cachedUser?.name}
+          </span>{" "}
+          ✨
+          {cachedUser?.name !== "Guest" ? "" : (
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: "400",
+                color: "#555",
+                marginLeft: "8px",
+              }}
+            >
+              ( Log in to unlock more features 🚀)
+            </span>
+          )}
+        </h1>
+
+        <div className="filter-container">
+          {["all", "easy", "medium", "hard"].map((level) => (
+            <button
+              key={level}
+              className={`${level} ${
+                difficulty === level ? `active ${level}` : ""
+              }`}
+              onClick={() => handleFilterChange(level)}
+            >
+              {level.charAt(0).toUpperCase() + level.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {isLoading ? (
+          <Spinner />
+        ) : error ? (
+          <p style={{ textAlign: "center", color: "red" }}>
+            Failed to load questions: {error.message}
+          </p>
+        ) : (
+          <StyledTable>
+            <StyledBody>
+              {questions.length > 0 ? (
+                questions.map((question) => (
+                  <QuestionRow key={question._id} question={question} />
+                ))
+              ) : (
+                <p style={{ textAlign: "center", padding: "1rem" }}>
+                  No questions found.
+                </p>
+              )}
+            </StyledBody>
+          </StyledTable>
+        )}
       </div>
-
-      {isLoading ? (
-        <Spinner />
-      ) : error ? (
-        <p style={{ textAlign: "center", color: "red" }}>
-          Failed to load questions: {error.message}
-        </p>
-      ) : (
-        <StyledTable>
-          <StyledBody>
-            {questions.length > 0 ? (
-              questions.map((question) => (
-                <QuestionRow key={question._id} question={question} />
-              ))
-            ) : (
-              <p style={{ textAlign: "center", padding: "1rem" }}>
-                No questions found.
-              </p>
-            )}
-          </StyledBody>
-        </StyledTable>
-      )}
     </div>
-  </div>
-);
+  );
 }
