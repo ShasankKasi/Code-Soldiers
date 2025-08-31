@@ -67,9 +67,7 @@ exports.runTestcases = async (req, res) => {
     }
   } catch (err) {
     // ✅ Forward actual error info
-    res.json({
-      status: "Compilation Error",
-      stderr: err.stderr || err.error?.message || "Unknown compilation error",
-    });
+      res.json({ status: "Compilation Error", stderr: err.error });
+
   }
 };

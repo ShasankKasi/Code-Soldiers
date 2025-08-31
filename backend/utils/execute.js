@@ -8,70 +8,59 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
+// 🔹 Helper to clean compiler errors
+function cleanCompilerError(stderr) {
+  return stderr
+    // Replace absolute or relative paths ending in .cpp/.c/.h/.hpp with "main.cpp"
+    .replace(/([A-Z]:)?[\/\\][\w\s.\-\/\\]+?\.(cpp|c|h|hpp)/gi, "Main.cpp")
+
+    // Remove duplicate "main.cpp" (cases like "Abraham main.cpp")
+    .replace(/\b\w*main\.cpp/g, "main.cpp")
+
+    // Remove empty lines
+    .replace(/^\s*[\r\n]/gm, "")
+    .trim();
+}
+
+
 const execute = (filePath, filePath2, language) => {
   if (language === "py") {
     return new Promise((resolve, reject) => {
       exec(`python "${filePath}" < "${filePath2}"`, (error, stdout, stderr) => {
-        if (error) {
-          // console.log(error);
-          reject({ error, stderr });
-          return;
-        }
-        if (stderr) {
-          // console.log(stderr)
-          reject({ stderr });
-          return;
+        if (error || stderr) {
+          return reject({ error: cleanCompilerError(stderr || error.message) });
         }
         resolve(stdout.trim());
       });
     });
-  }else if (language === "java") {
+  } else if (language === "java") {
     return new Promise((resolve, reject) => {
       const dir = path.dirname(filePath);
-      const className = path.basename(filePath, ".java"); // e.g. HelloWorld.java → HelloWorld
+      const className = path.basename(filePath, ".java");
 
-      // Step 1: Compile
-      // console.log(`javac "${filePath}"`);
-      
       exec(`javac "${filePath}"`, (error, stdout, stderr) => {
-        if (error) return reject({ error, stderr });
-        if (stderr) return reject({ stderr });
-        // console.log(`Compilation stdout: ${stdout}`);
-        // console.log(`Compilation stderr: ${stderr}`);
-        
-        
-        // Step 2: Run
-        exec(
-          `java -cp "${dir}" ${className} < "${filePath2}"`,
-          (error, stdout, stderr) => {
-            // console.log(`java -cp "${dir}" ${className} < "${filePath2}"`);
-            // console.log(`error: ${error}`);
-            
-            
-            if (error) return reject({ error, stderr });
-            if (stderr) return reject({ stderr });
-            resolve(stdout.trim());
+        if (error || stderr) {
+          return reject({ error: cleanCompilerError(stderr || error.message) });
+        }
+
+        exec(`java -cp "${dir}" ${className} < "${filePath2}"`, (error, stdout, stderr) => {
+          if (error || stderr) {
+            return reject({ error: cleanCompilerError(stderr || error.message) });
           }
-        );
+          resolve(stdout.trim());
+        });
       });
     });
-  }  else {
+  } else {
     const jobID = path.basename(filePath).split(".")[0];
     const outPath = path.join(outputPath, `${jobID}.exe`);
-    // const fil1=`"${filePath}"`;
+
     return new Promise((resolve, reject) => {
       exec(
         `cmd /c g++ "${filePath}" -o "${outPath}" && cd "${outputPath}" && "${jobID}.exe" < "${filePath2}"`,
         (error, stdout, stderr) => {
-          if (error) {
-            // console.log(error);
-            reject({ error, stderr });
-            return;
-          }
-          if (stderr) {
-            // console.log(stderr);
-            reject({ stderr });
-            return;
+          if (error || stderr) {
+            return reject({ error: cleanCompilerError(stderr || error.message) });
           }
           resolve(stdout.trim());
         }

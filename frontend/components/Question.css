@@ -149,16 +149,27 @@
 .c-Error {
   border: 2px solid red;
   background: #ffe6e6;
-  padding: 10px;
-  margin: 15px 0;
-  border-radius: 8px;
+  padding: 20px;                /* more padding */
+  margin: 20px auto;            /* center horizontally */
+  border-radius: 10px;
+  max-width: 80%;               /* don't span full screen */
+  font-size: 16px;
+  text-align: left;             /* align like compiler output */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* soft shadow */
 }
 
 .c-error2 {
   color: #b30000;
-  white-space: pre-wrap; /* preserves line breaks */
-  font-family: monospace;
+  white-space: pre-wrap;        /* preserve formatting */
+  font-family: monospace;       /* monospace font for compiler errors */
+  margin-top: 10px;
+  padding: 10px;
+  background: #fff5f5;          /* subtle lighter bg */
+  border-radius: 6px;
+  border: 1px solid #ffcccc;
+  overflow-x: auto;             /* allow horizontal scroll if error is long */
 }
+
 
 
 th,
