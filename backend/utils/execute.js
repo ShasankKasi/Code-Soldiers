@@ -8,14 +8,20 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
-// 🔹 Helper to clean compiler errors
+// 🔹 Helper to clean compiler/runtime errors
 function cleanCompilerError(stderr) {
   return stderr
-    // Replace absolute or relative paths ending in .cpp/.c/.h/.hpp with "main.cpp"
+    // Replace C++/C/H paths → Main.cpp
     .replace(/([A-Z]:)?[\/\\][\w\s.\-\/\\]+?\.(cpp|c|h|hpp)/gi, "Main.cpp")
 
-    // Remove duplicate "main.cpp" (cases like "Abraham main.cpp")
-    .replace(/\b\w*main\.cpp/g, "main.cpp")
+    // Replace Python paths → Main.py
+    .replace(/([A-Z]:)?[\/\\][\w\s.\-\/\\]+?\.py/gi, "Main.py")
+
+    // Replace Java paths → Main.java
+    .replace(/([A-Z]:)?[\/\\][\w\s.\-\/\\]+?\.java/gi, "Main.java")
+
+    // Remove duplicate "Main.*" (cases like "AbrahamMain.cpp")
+    .replace(/\b\w*Main\.(cpp|py|java)/gi, (m, ext) => `Main.${ext}`)
 
     // Remove empty lines
     .replace(/^\s*[\r\n]/gm, "")
