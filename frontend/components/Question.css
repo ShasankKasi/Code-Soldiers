@@ -86,13 +86,24 @@
   background-color: black;
   position: relative;
 }
-
+.button:disabled {
+  background-color: grey;
+  color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 .buttons {
   display: flex;
   background-color: white;
   justify-content: center;
   align-items: center;
   height: 100px;
+}
+.buttons:disabled {
+  background-color: grey;
+  color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .loading-image {
@@ -136,25 +147,19 @@
 }
 
 .c-Error {
-  color: red;
-  margin: 0 auto 15px;
-  border-radius: 5px;
-  text-align: left;
-  width: 80%;
-  font-size: 25px;
+  border: 2px solid red;
+  background: #ffe6e6;
   padding: 10px;
-  border: 2px solid rgb(219, 68, 68);
+  margin: 15px 0;
+  border-radius: 8px;
 }
 
 .c-error2 {
-  color: black;
-  background-color: rgb(243, 154, 154);
-  width: fit-content;
-  text-align: center;
-  margin-top: 10px;
-  font-size: 19px;
-  padding: 10px;
+  color: #b30000;
+  white-space: pre-wrap; /* preserves line breaks */
+  font-family: monospace;
 }
+
 
 th,
 td {

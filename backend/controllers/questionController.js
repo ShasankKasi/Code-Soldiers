@@ -32,11 +32,10 @@ exports.getQuestionById = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch question" });
   }
 };
-
 // ✅ Run testcases for a question
 exports.runTestcases = async (req, res) => {
   const { testcases, language, code, limit } = req.body;
-  console.log("Run Testcases Request:", { language, limit, codeLength: code.length });
+
   if (!code) {
     return res.status(400).json({ success: false, error: "Code is empty" });
   }
@@ -67,6 +66,10 @@ exports.runTestcases = async (req, res) => {
       res.json({ status: "Fail", count, results, solve });
     }
   } catch (err) {
-    res.json({ status: "Compilation Error", err });
+    // ✅ Forward actual error info
+    res.json({
+      status: "Compilation Error",
+      stderr: err.stderr || err.error?.message || "Unknown compilation error",
+    });
   }
 };

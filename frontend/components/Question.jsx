@@ -56,7 +56,6 @@ public class Main {
     }
 }`,
 };
-
 const handleClick = async (
   testcases,
   code,
@@ -71,18 +70,18 @@ const handleClick = async (
   setCorrect,
   setError,
   setTimeTaken,
-  language
+  language,
+  setCompilerError
 ) => {
   const startTime = Date.now();
   try {
     setError(false);
-    setCorrect(false);
     if (limit === 2) setY(false);
+
     checking(true);
+    // ❌ removed: setVerdict([]); setSolve([]); setPass(0);
 
     const body = { testcases, language, code, limit };
-
-    // ✅ Use axiosHelper instead of raw axios
     const response = await axiosHelper.post(`/api/questions/${id}`, body);
 
     checking(false);
@@ -92,32 +91,47 @@ const handleClick = async (
     const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
     setTimeTaken(timeTaken);
 
+    // ✅ Now reset + update only after response
     if (response.data.status === "NoOutput") {
       toast.error("No output");
+      setVerdict([]);
+      setSolve([]);
+      setPass(0);
     } else if (response.data.status === "Success") {
       setX(true);
       setSolve(response.data.solve);
-      toast.success("Test cases ran successfully");
+      setVerdict(response.data.results);
       setPass(response.data.count);
       setCorrect(true);
+      toast.success("Test cases ran successfully");
     } else if (response.data.status === "Fail") {
       setX(true);
       setSolve(response.data.solve);
+      setVerdict(response.data.results);
       setPass(response.data.count);
-    } else if (response.data.status === "Compilation Error") {
-      setError(true);
-      setX(false);
-      setY(false);
-      toast.error("Compilation error");
-    }
+      setCorrect(false);
+   } else if (response.data.status === "Compilation Error") {
+  setError(true);
+  setX(false);
+  setY(false);
+  setVerdict([]);
+  setSolve([]);
+  setPass(0);
 
-    setVerdict(response.data.results);
+  // ✅ Save error in state instead of toast
+  toast.error("Compilation Error");
+  setCompilerError(response.data.stderr || "Unknown compilation error");
+}
+
+
   } catch (e) {
+    checking(false);
     toast.error(
       e.response?.data?.message || "Unknown error occurred. Please try again."
     );
   }
 };
+
 
 const fetchQuestion = async (id) => {
   const { data } = await axiosHelper.get(`/api/questions/${id}`);
@@ -140,6 +154,8 @@ const Question = () => {
   const [code, setCode] = useState(defaultTemplates.cpp); // default C++
   const [solve, setSolve] = useState([]);
   const [y, setY] = useState(false);
+  const [compilerError, setCompilerError] = useState("");
+
   const [language, setLanguage] = useState("cpp");
   const [running, setRunning] = useState(false);
   const [x, setX] = useState(false);
@@ -204,7 +220,7 @@ const Question = () => {
           <div className="description">
             <p>
               <b>Input Format : </b>
-              { question["Input Format"]}
+              {question["Input Format"]}
             </p>
           </div>
 
@@ -212,7 +228,7 @@ const Question = () => {
           <div className="description">
             <p>
               <b>Output Format : </b>
-              { question["Output Format"]}
+              {question["Output Format"]}
             </p>
           </div>
           <ul className="unorderedlist">
@@ -275,94 +291,120 @@ const Question = () => {
 
       {/* Run & Submit Buttons */}
       <div className="buttons">
-  {isLoggedIn ? (
-    <>
-      <button
-        type="button"
-        className="button"
-        onClick={() =>
-          handleClick(
-            question.testcases,
-            code,
-            id,
-            2,
-            setPass,
-            setRunning,
-            setVerdict,
-            setX,
-            setY,
-            setSolve,
-            setCorrect,
-            setError,
-            setTimeTaken,
-            language
-          )
-        }
-      >
-        {running ? <SpinnerMini /> : "Run"}
-      </button>
-      <button
-        type="button"
-        className="button"
-        onClick={() =>
-          handleClick(
-            question.testcases,
-            code,
-            id,
-            question.testcases.length,
-            setPass,
-            setSubmitting,
-            setVerdict,
-            setX,
-            setY,
-            setSolve,
-            setCorrect,
-            setError,
-            setTimeTaken,
-            language
-          )
-        }
-      >
-        {submitting ? <SpinnerMini /> : "Submit"}
-      </button>
-    </>
-  ) : (
-    <div className="locked-editor">
-      🔒 <span>Please <a href="/login">login</a> to unlock editor</span>
-    </div>
-  )}
-</div>
+        {isLoggedIn ? (
+          <>
+            <button
+              type="button"
+              className="button"
+              disabled={running || submitting} // ⬅️ disable while running
+              onClick={() =>
+                handleClick(
+                  question.testcases,
+                  code,
+                  id,
+                  2,
+                  setPass,
+                  setRunning,
+                  setVerdict,
+                  setX,
+                  setY,
+                  setSolve,
+                  setCorrect,
+                  setError,
+                  setTimeTaken,
+                  language,
+                  setCompilerError
+                )
+              }
+            >
+              {running ? <SpinnerMini /> : "Run"}
+            </button>
+
+            <button
+              type="button"
+              className="button"
+              disabled={submitting || running} // ⬅️ disable while submitting
+              onClick={() =>
+                handleClick(
+                  question.testcases,
+                  code,
+                  id,
+                  question.testcases.length,
+                  setPass,
+                  setSubmitting,
+                  setVerdict,
+                  setX,
+                  setY,
+                  setSolve,
+                  setCorrect,
+                  setError,
+                  setTimeTaken,
+                  language,
+                  setCompilerError
+                )
+              }
+            >
+              {submitting ? <SpinnerMini /> : "Submit"}
+            </button>
+          </>
+        ) : (
+          <div className="locked-editor">
+            🔒{" "}
+            <span>
+              Please <a href="/login">login</a> to unlock editor
+            </span>
+          </div>
+        )}
+      </div>
+
       {/* Compilation Error */}
       {error && (
-        <div className="c-Error">
-          <strong>Compilation Error:</strong>
-          <p className="c-error2">
-            Check the possible syntax errors and try running it again.
-          </p>
-        </div>
-      )}
+  <div className="c-Error">
+    <strong>Compilation Error:</strong>
+    <pre className="c-error2">
+      {compilerError}
+    </pre>
+  </div>
+)}
+
 
       {/* Test Results */}
-      {!error && !y && (
-        <div className="result">
-          <h1>
-            {!x ? (
-              <RunTest testcases={question.testcases} flag={false} />
-            ) : (
-              <RunTest
-                testcases={question.testcases}
-                flag={true}
-                verdict={verdict}
-                solve={solve}
-                timeTaken={timeTaken}
-              />
-            )}
-          </h1>
+    {/* Test Results */}
+{!error && !y && (
+  <div className="result">
+    {running ? (
+      <div className="running">
+        <h1>Running Test Cases...</h1>
+        <Spinner />
+      </div>
+    ) : (
+      <h1>
+        {!x ? (
+          <RunTest testcases={question.testcases} flag={false} />
+        ) : (
+          <RunTest
+            testcases={question.testcases}
+            flag={true}
+            verdict={verdict}
+            solve={solve}
+            timeTaken={timeTaken}
+          />
+        )}
+      </h1>
+    )}
+  </div>
+)}
+
+
+      {/* Submission Verdict */}
+      {submitting && (
+        <div className="submitted">
+          <h1>Evaluating...</h1>
+          <Spinner />
         </div>
       )}
 
-      {/* Submission Verdict */}
-      {!error && y && (
+      {!error && y && !submitting && (
         <div
           className="submitted"
           style={{ border: correct ? "4px solid green" : "4px solid red" }}
@@ -405,12 +447,12 @@ const Question = () => {
             <div className="info">
               <p>Your Program failed for 😔:</p>
               <p>Input:</p>
-              <p className="failed-input">
+              <div className="failed-input">
                 <pre>
                   {question.testcases[solve.findIndex((item) => item === false)]
                     ?.input || "No failed test cases found"}
                 </pre>
-              </p>
+              </div>
             </div>
           )}
         </div>
