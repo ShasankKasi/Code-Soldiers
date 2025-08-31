@@ -11,19 +11,10 @@ if (!fs.existsSync(outputPath)) {
 // 🔹 Helper to clean compiler/runtime errors
 function cleanCompilerError(stderr) {
   return stderr
-    // Replace C++/C/H paths → Main.cpp
     .replace(/([A-Z]:)?[\/\\][\w\s.\-\/\\]+?\.(cpp|c|h|hpp)/gi, "Main.cpp")
-
-    // Replace Python paths → Main.py
     .replace(/([A-Z]:)?[\/\\][\w\s.\-\/\\]+?\.py/gi, "Main.py")
-
-    // Replace Java paths → Main.java
     .replace(/([A-Z]:)?[\/\\][\w\s.\-\/\\]+?\.java/gi, "Main.java")
-
-    // Remove duplicate "Main.*" (cases like "AbrahamMain.cpp")
     .replace(/\b\w*Main\.(cpp|py|java)/gi, (m, ext) => `Main.${ext}`)
-
-    // Remove empty lines
     .replace(/^\s*[\r\n]/gm, "")
     .trim();
 }

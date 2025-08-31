@@ -71,7 +71,10 @@ export default function Forgot() {
   return (
     <div>
       <Homebar />
+                <img src="/logo.png" alt="Logo" className="profile-icon" />
+
       <div className="forgot-container">
+
         <div className="card">
           {/* Step indicator */}
           <div className="steps">

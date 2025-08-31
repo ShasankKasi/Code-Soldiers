@@ -2,11 +2,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 90vh;
-  background: linear-gradient(135deg, #007bff, #6a11cb);
+  /* min-height: 90vh; */
+  /* background: linear-gradient(135deg, #eff1f0, #6a11cb); */
   padding: 20px;
 }
 
+.profile-icon {
+  height: 150px; /* Reduced from 150px to save space */
+  width: 180px;
+  border-radius: 90%;
+  display: block;
+  margin: 0 auto 1px auto;
+}
 .card {
   width: 100%;
   max-width: 420px;

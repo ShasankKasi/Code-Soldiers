@@ -61,7 +61,7 @@ form {
 
 .input-container {
   position: relative;
-  width: 100%;
+  width: 118%;
   margin-bottom: 16px;
 }
 
@@ -132,7 +132,7 @@ input {
 }
 
 button {
-  width: 100%;
+  width: 110%;
   height: 42px;
   border-radius: 20px;
   background-color: #007bff;
@@ -149,6 +149,7 @@ button:hover {
 
 .login-button {
   margin-top: 16px;
+  margin-left: 29px;
 }
 
 .link {
@@ -174,6 +175,8 @@ a:hover {
   text-decoration: underline;
   padding: 6px;
   font: inherit;
+  margin-left: 29px;
+  width: 100%;
 }
 
 .link-button:hover {
