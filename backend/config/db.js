@@ -4,8 +4,6 @@ const connectDatabase = async () => {
   try {
     await mongoose.connect(process.env.DB_URI, {
       family: 4,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
     });
     console.log("✅ MongoDB Connected");
   } catch (error) {
