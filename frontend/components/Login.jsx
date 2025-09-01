@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Homebar from "./Homebar";
 import { FaUser, FaLock } from "react-icons/fa";
 import "./Login.css";
-import api from "../src/utils/axiosHelper"; // <-- use helper
+import api from "../src/utils/axiosHelper";
 
 export default function Login() {
   const navigate = useNavigate();
