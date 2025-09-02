@@ -2,14 +2,14 @@ version: "3.8"
 
 services:
   frontend:
-    build: ./frontend
+    image: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
     ports:
       - "80:80"
     depends_on:
       - backend
 
   backend:
-    build: ./backend
+    image: ${{ secrets.DOCKER_USERNAME }}/backend:latest
     ports:
       - "5000:5000"
     environment:
