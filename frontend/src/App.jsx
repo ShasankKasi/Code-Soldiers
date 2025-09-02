@@ -59,7 +59,6 @@ export default function App() {
         </Routes>
       </Router>
 
-      {/* Global toaster */}
       <Toaster
         position="top-center"
         gutter={12}
