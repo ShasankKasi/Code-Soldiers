@@ -6,8 +6,6 @@ const SenderEmail = process.env.SenderEmail; // set in .env
 const passkey = process.env.adminPass; // set in .env
 const nodemailer = require("nodemailer");
 
-// const otpStore = {};
-// In your auth controller
 const otpStore = {}; // already exists
 
 exports.sendSignupOtp = async (req, res) => {
@@ -21,6 +19,7 @@ exports.sendSignupOtp = async (req, res) => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
     otpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 };
+
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -80,7 +79,6 @@ const user = await User.findOne({ email: email.toLowerCase() });
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
-    // console.log(user.email,process.env.adminEmail);
     
     if (email === process.env.adminEmail) {
       return res.json({ status: "admin", email: user.email, name: user.name, token });
@@ -120,7 +118,6 @@ otpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 }; // 5 min expiry
       text: `Hi, your OTP is ${otp}. Please do not share it.`,
     };
 
-    // Use await to ensure OTP is stored before proceeding
     await transporter.sendMail(mailOptions);
 
     // console.log("OTP stored for:", email, otp);
