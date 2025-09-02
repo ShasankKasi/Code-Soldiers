@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   // eslint-disable-next-line no-undef
-  baseURL: "http://localhost:5000",
+  baseURL: "/api",
 });
 
 // Add JWT to headers automatically
