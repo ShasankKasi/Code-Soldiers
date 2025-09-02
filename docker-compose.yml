@@ -1,16 +1,17 @@
 version: "3.8"
-
 services:
-  frontend:
-    image: ${DOCKER_USERNAME}/frontend:latest
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-
   backend:
     image: ${DOCKER_USERNAME}/backend:latest
+    container_name: app_backend
     ports:
       - "5000:5000"
     environment:
       - NODE_ENV=production
+    restart: always
+
+  frontend:
+    image: ${DOCKER_USERNAME}/frontend:latest
+    container_name: app_frontend
+    ports:
+      - "80:80"
+    restart: always
