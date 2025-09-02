@@ -22,7 +22,6 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/questions", require("./routes/questionRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 
-// Global error handler (basic)
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: "Something went wrong!" });
