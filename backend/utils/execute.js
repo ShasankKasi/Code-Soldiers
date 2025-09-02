@@ -8,7 +8,6 @@ if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
 
-// 🔹 Helper to clean compiler/runtime errors
 function cleanCompilerError(stderr) {
   return stderr
     .replace(/([A-Z]:)?[\/\\][\w\s.\-\/\\]+?\.(cpp|c|h|hpp)/gi, "Main.cpp")
