@@ -9,8 +9,7 @@ jobs:
   # Build Frontend Image only when frontend changes
   build-frontend:
     runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.result.outputs.changed }}
+    if: ${{ github.event_name == 'push' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -19,7 +18,8 @@ jobs:
         id: frontend-changes
         uses: tj-actions/changed-files@v45
         with:
-          files: frontend/**
+          files: |
+            frontend/**
 
       - name: Login to DockerHub
         if: steps.frontend-changes.outputs.any_changed == 'true'
@@ -34,15 +34,10 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
-      - name: Set job output
-        id: result
-        run: echo "changed=${{ steps.frontend-changes.outputs.any_changed }}" >> $GITHUB_OUTPUT
-
   # Build Backend Image only when backend changes
   build-backend:
     runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.result.outputs.changed }}
+    if: ${{ github.event_name == 'push' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -51,7 +46,8 @@ jobs:
         id: backend-changes
         uses: tj-actions/changed-files@v45
         with:
-          files: backend/**
+          files: |
+            backend/**
 
       - name: Login to DockerHub
         if: steps.backend-changes.outputs.any_changed == 'true'
@@ -66,20 +62,25 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
           docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
 
-      - name: Set job output
-        id: result
-        run: echo "changed=${{ steps.backend-changes.outputs.any_changed }}" >> $GITHUB_OUTPUT
-
-  # Deploy only if frontend OR backend changed
+  # Deploy if frontend OR backend OR docker-compose.yml changes
   deploy:
     runs-on: ubuntu-latest
     needs: [build-frontend, build-backend]
-    if: needs.build-frontend.outputs.changed == 'true' || needs.build-backend.outputs.changed == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Detect changes
+        id: detect-changes
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            frontend/**
+            backend/**
+            docker-compose.yml
+
       - name: Create .env on EC2
+        if: steps.detect-changes.outputs.any_changed == 'true'
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -90,6 +91,7 @@ jobs:
             echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" > ~/app/.env
 
       - name: Copy docker-compose.yml to EC2
+        if: steps.detect-changes.outputs.any_changed == 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -99,6 +101,7 @@ jobs:
           target: "~/app/"
 
       - name: Deploy on EC2
+        if: steps.detect-changes.outputs.any_changed == 'true'
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -109,3 +112,4 @@ jobs:
             sudo docker-compose pull
             sudo docker-compose up -d
             sudo docker image prune -f
+
