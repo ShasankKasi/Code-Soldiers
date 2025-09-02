@@ -62,7 +62,7 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
           docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
 
-  # Deploy only if frontend or backend changed
+  # Deploy if frontend OR backend OR docker-compose.yml changes
   deploy:
     runs-on: ubuntu-latest
     needs: [build-frontend, build-backend]
@@ -70,13 +70,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Detect changes in frontend or backend
+      - name: Detect changes
         id: detect-changes
         uses: tj-actions/changed-files@v45
         with:
           files: |
             frontend/**
             backend/**
+            docker-compose.yml
 
       - name: Create .env on EC2
         if: steps.detect-changes.outputs.any_changed == 'true'
