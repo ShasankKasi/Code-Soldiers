@@ -9,6 +9,8 @@ jobs:
   # Build Frontend Image only when frontend changes
   build-frontend:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.result.outputs.changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -32,13 +34,15 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
-      - name: Set output
+      - name: Set job output
         id: result
         run: echo "changed=${{ steps.frontend-changes.outputs.any_changed }}" >> $GITHUB_OUTPUT
 
   # Build Backend Image only when backend changes
   build-backend:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.result.outputs.changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -62,7 +66,7 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
           docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
 
-      - name: Set output
+      - name: Set job output
         id: result
         run: echo "changed=${{ steps.backend-changes.outputs.any_changed }}" >> $GITHUB_OUTPUT
 
@@ -70,7 +74,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [build-frontend, build-backend]
-    if: needs.build-frontend.outputs.result_changed == 'true' || needs.build-backend.outputs.result_changed == 'true'
+    if: needs.build-frontend.outputs.changed == 'true' || needs.build-backend.outputs.changed == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
