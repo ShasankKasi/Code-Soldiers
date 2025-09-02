@@ -15,8 +15,8 @@ const questionSchema = new mongoose.Schema(
       enum: ["Easy", "Medium", "Hard"], 
       required: true 
     },
-    "Input Format": { type: String, required: true },  // ✅ space in key
-    "Output Format": { type: String, required: true } // ✅ space in key
+    "Input Format": { type: String, required: true },  
+    "Output Format": { type: String, required: true } 
   },
   { timestamps: true }
 );
