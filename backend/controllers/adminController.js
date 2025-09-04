@@ -10,7 +10,6 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch users" });
   }
 };
-// ✅ Add question (admin only)
 exports.addQuestion = async (req, res) => {
   try {
     const { title, description, testcases, difficulty, inputFormat, outputFormat } = req.body;
