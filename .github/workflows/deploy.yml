@@ -41,7 +41,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-
   # Build + Deploy Backend to Beanstalk
   deploy-backend:
     runs-on: ubuntu-latest
@@ -56,42 +55,16 @@ jobs:
           files: |
             backend/**
 
-      - name: Login to DockerHub
+      - name: Install backend deps
         if: steps.backend-changes.outputs.any_changed == 'true'
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+        working-directory: backend
+        run: npm install --production
 
-      - name: Build and push backend Docker image
+      - name: Zip backend source
         if: steps.backend-changes.outputs.any_changed == 'true'
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
-          docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
-
-      - name: Generate Dockerrun.aws.json
-        if: steps.backend-changes.outputs.any_changed == 'true'
-        run: |
-          cat > Dockerrun.aws.json <<EOL
-          {
-            "AWSEBDockerrunVersion": 2,
-            "containerDefinitions": [
-              {
-                "name": "backend",
-                "image": "${{ secrets.DOCKER_USERNAME }}/backend:latest",
-                "essential": true,
-                "memory": 512,
-                "portMappings": [
-                  { "containerPort": 5000, "hostPort": 5000 }
-                ]
-              }
-            ]
-          }
-          EOL
-
-      - name: Zip Dockerrun file
-        if: steps.backend-changes.outputs.any_changed == 'true'
-        run: zip deploy.zip Dockerrun.aws.json
+          cd backend
+          zip -r ../deploy.zip . -x "*.git*" "node_modules/*"
 
       - name: Upload and deploy to Elastic Beanstalk
         if: steps.backend-changes.outputs.any_changed == 'true'

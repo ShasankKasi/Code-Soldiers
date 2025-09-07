@@ -21,7 +21,6 @@ function cleanDirectory(directory) {
   }
 }
 
-// Call cleanup before generating files
 
 const generateFile = async (language, code, input) => {
   let fileName;
