@@ -96,12 +96,20 @@ jobs:
       - name: Upload and deploy to Elastic Beanstalk
         if: steps.backend-changes.outputs.any_changed == 'true'
         run: |
-          aws s3 cp deploy.zip s3://${{ secrets.EB_BUCKET }}/deploy-$(date +%s).zip
-          VERSION="v-$(date +%s)"
+          TIMESTAMP=$(date +%s)
+          FILE="deploy-$TIMESTAMP.zip"
+          VERSION="v-$TIMESTAMP"
+
+          # Upload artifact to S3
+          aws s3 cp deploy.zip s3://${{ secrets.EB_BUCKET }}/$FILE
+
+          # Create Beanstalk app version
           aws elasticbeanstalk create-application-version \
             --application-name ${{ secrets.EB_APP_NAME }} \
             --version-label $VERSION \
-            --source-bundle S3Bucket=${{ secrets.EB_BUCKET }},S3Key=deploy-$(date +%s).zip
+            --source-bundle S3Bucket=${{ secrets.EB_BUCKET }},S3Key=$FILE
+
+          # Update Beanstalk environment
           aws elasticbeanstalk update-environment \
             --environment-name ${{ secrets.EB_ENV_NAME }} \
             --version-label $VERSION

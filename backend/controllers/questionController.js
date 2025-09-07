@@ -57,7 +57,7 @@ exports.runTestcases = async (req, res) => {
       solve[i] = output === output_req;
 
       if (solve[i]) count++;
-      else if (limit > 2) break; // fail fast if too many fails
+      else if (limit > 2) break;
     }
 
     if (count === limit) {
