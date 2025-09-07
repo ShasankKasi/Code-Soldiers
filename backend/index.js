@@ -13,7 +13,21 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  process.env.frontend_url, // production
+  "http://localhost:5173" // keep for local dev
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // allow cookies/headers if needed
+}));
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true })); 
 
