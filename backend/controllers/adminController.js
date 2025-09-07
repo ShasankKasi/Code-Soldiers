@@ -35,9 +35,3 @@ exports.addQuestion = async (req, res) => {
     res.status(500).json({ message: "Failed to add question", error: err.message });
   }
 };
-
-// // helper: ensure correct case for enum
-// function capitalizeDifficulty(difficulty) {
-//   if (!difficulty) return "";
-//   return difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
-// }
