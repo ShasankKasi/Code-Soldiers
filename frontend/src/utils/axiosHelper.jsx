@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://codesoldiers.ap-south-1.elasticbeanstalk.com:8080",
+  baseURL: "https://codesoldiers.ap-south-1.elasticbeanstalk.com:8080",
 });
 
 // Add JWT to headers automatically
