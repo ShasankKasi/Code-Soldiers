@@ -1,92 +1,92 @@
-name: CI/CD Deploy MERN to AWS (S3 + Beanstalk)
+# name: CI/CD Deploy MERN to AWS (S3 + Beanstalk)
 
-on:
-  push:
-    branches:
-      - "main"
+# on:
+#   push:
+#     branches:
+#       - "main"
 
-jobs:
-  # Build + Deploy Frontend to S3
-  deploy-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+# jobs:
+#   # Build + Deploy Frontend to S3
+#   deploy-frontend:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Detect changes in frontend
-        id: frontend-changes
-        uses: tj-actions/changed-files@v45
-        with:
-          files: |
-            frontend/**
+#       - name: Detect changes in frontend
+#         id: frontend-changes
+#         uses: tj-actions/changed-files@v45
+#         with:
+#           files: |
+#             frontend/**
 
-      - name: Set up Node.js
-        if: steps.frontend-changes.outputs.any_changed == 'true'
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+#       - name: Set up Node.js
+#         if: steps.frontend-changes.outputs.any_changed == 'true'
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 18
 
-      - name: Build frontend
-        if: steps.frontend-changes.outputs.any_changed == 'true'
-        working-directory: frontend
-        run: |
-          npm install
-          npm run build
+#       - name: Build frontend
+#         if: steps.frontend-changes.outputs.any_changed == 'true'
+#         working-directory: frontend
+#         run: |
+#           npm install
+#           npm run build
 
-      - name: Sync build to S3
-        if: steps.frontend-changes.outputs.any_changed == 'true'
-        run: |
-          aws s3 sync frontend/dist/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-  # Build + Deploy Backend to Beanstalk
-  deploy-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#       - name: Sync build to S3
+#         if: steps.frontend-changes.outputs.any_changed == 'true'
+#         run: |
+#           aws s3 sync frontend/dist/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+#   # Build + Deploy Backend to Beanstalk
+#   deploy-backend:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Detect changes in backend
-        id: backend-changes
-        uses: tj-actions/changed-files@v45
-        with:
-          files: |
-            backend/**
+#       - name: Detect changes in backend
+#         id: backend-changes
+#         uses: tj-actions/changed-files@v45
+#         with:
+#           files: |
+#             backend/**
 
-      - name: Install backend deps
-        if: steps.backend-changes.outputs.any_changed == 'true'
-        working-directory: backend
-        run: npm install --production
+#       - name: Install backend deps
+#         if: steps.backend-changes.outputs.any_changed == 'true'
+#         working-directory: backend
+#         run: npm install --production
 
-      - name: Zip backend source
-        if: steps.backend-changes.outputs.any_changed == 'true'
-        run: |
-          cd backend
-          zip -r ../deploy.zip . -x "*.git*" "node_modules/*"
+#       - name: Zip backend source
+#         if: steps.backend-changes.outputs.any_changed == 'true'
+#         run: |
+#           cd backend
+#           zip -r ../deploy.zip . -x "*.git*" "node_modules/*"
 
-      - name: Upload and deploy to Elastic Beanstalk
-        if: steps.backend-changes.outputs.any_changed == 'true'
-        run: |
-          TIMESTAMP=$(date +%s)
-          FILE="deploy-$TIMESTAMP.zip"
-          VERSION="v-$TIMESTAMP"
+#       - name: Upload and deploy to Elastic Beanstalk
+#         if: steps.backend-changes.outputs.any_changed == 'true'
+#         run: |
+#           TIMESTAMP=$(date +%s)
+#           FILE="deploy-$TIMESTAMP.zip"
+#           VERSION="v-$TIMESTAMP"
 
-          # Upload artifact to S3
-          aws s3 cp deploy.zip s3://${{ secrets.EB_BUCKET }}/$FILE
+#           # Upload artifact to S3
+#           aws s3 cp deploy.zip s3://${{ secrets.EB_BUCKET }}/$FILE
 
-          # Create Beanstalk app version
-          aws elasticbeanstalk create-application-version \
-            --application-name ${{ secrets.EB_APP_NAME }} \
-            --version-label $VERSION \
-            --source-bundle S3Bucket=${{ secrets.EB_BUCKET }},S3Key=$FILE
+#           # Create Beanstalk app version
+#           aws elasticbeanstalk create-application-version \
+#             --application-name ${{ secrets.EB_APP_NAME }} \
+#             --version-label $VERSION \
+#             --source-bundle S3Bucket=${{ secrets.EB_BUCKET }},S3Key=$FILE
 
-          # Update Beanstalk environment
-          aws elasticbeanstalk update-environment \
-            --environment-name ${{ secrets.EB_ENV_NAME }} \
-            --version-label $VERSION
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+#           # Update Beanstalk environment
+#           aws elasticbeanstalk update-environment \
+#             --environment-name ${{ secrets.EB_ENV_NAME }} \
+#             --version-label $VERSION
+#         env:
+#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}

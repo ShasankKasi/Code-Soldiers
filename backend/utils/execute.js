@@ -4,6 +4,7 @@ const path = require("path");
 
 const outputPath = path.join(__dirname, "outputs");
 
+// Ensure outputs directory exists
 if (!fs.existsSync(outputPath)) {
   fs.mkdirSync(outputPath, { recursive: true });
 }
@@ -18,11 +19,11 @@ function cleanCompilerError(stderr) {
     .trim();
 }
 
-
 const execute = (filePath, filePath2, language) => {
   if (language === "py") {
+    // Run Python code with python3
     return new Promise((resolve, reject) => {
-      exec(`python "${filePath}" < "${filePath2}"`, (error, stdout, stderr) => {
+      exec(`python3 "${filePath}" < "${filePath2}"`, (error, stdout, stderr) => {
         if (error || stderr) {
           return reject({ error: cleanCompilerError(stderr || error.message) });
         }
@@ -30,6 +31,7 @@ const execute = (filePath, filePath2, language) => {
       });
     });
   } else if (language === "java") {
+    // Compile and run Java code
     return new Promise((resolve, reject) => {
       const dir = path.dirname(filePath);
       const className = path.basename(filePath, ".java");
@@ -47,21 +49,27 @@ const execute = (filePath, filePath2, language) => {
         });
       });
     });
-  } else {
+  } else if (language === "cpp" || language === "c") {
+    // Compile and run C/C++ code
     const jobID = path.basename(filePath).split(".")[0];
-    const outPath = path.join(outputPath, `${jobID}.exe`);
+    const outPath = path.join(outputPath, jobID);
 
     return new Promise((resolve, reject) => {
-      exec(
-        `cmd /c g++ "${filePath}" -o "${outPath}" && cd "${outputPath}" && "${jobID}.exe" < "${filePath2}"`,
-        (error, stdout, stderr) => {
+      exec(`g++ "${filePath}" -o "${outPath}"`, (error, stdout, stderr) => {
+        if (error || stderr) {
+          return reject({ error: cleanCompilerError(stderr || error.message) });
+        }
+
+        exec(`"${outPath}" < "${filePath2}"`, (error, stdout, stderr) => {
           if (error || stderr) {
             return reject({ error: cleanCompilerError(stderr || error.message) });
           }
           resolve(stdout.trim());
-        }
-      );
+        });
+      });
     });
+  } else {
+    return Promise.reject({ error: "Unsupported language" });
   }
 };
 
