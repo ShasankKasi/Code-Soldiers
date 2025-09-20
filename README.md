@@ -46,7 +46,7 @@ Check out the live version of our platform here: http://codesoldiers.s3-website.
 
 ## Contact
 
-For any questions or feedback, feel free to contact me at : noreply@codesoldiers@gmail.com.
+For any questions or feedback, feel free to contact me at : noreply.codesoldiers@gmail.com
 
 ---
 
