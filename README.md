@@ -42,11 +42,11 @@ This online judge platform is designed to help users solve coding problems in va
 
 ## Deployment
 
-Check out the live version of our platform here: http://13.51.168.80:8000
+Check out the live version of our platform here: http://codesoldiers.s3-website.ap-south-1.amazonaws.com/
 
 ## Contact
 
-For any questions or feedback, feel free to contact me at : shasankreddy4563@gmail.com.
+For any questions or feedback, feel free to contact me at : noreply@codesoldiers@gmail.com.
 
 ---
 
